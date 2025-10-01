@@ -1,0 +1,33 @@
+ home ❯ Documents ❯ pixeltrack-standalone ❯ src ❯ mojo-serial ( profiling)
+❯_: ./mojo-serial --maxEvents 100000 --warmupEvents 1000
+Processing 100000 events after 1000 events of warm up, with 1 concurrent events and 1 threads.
+Processed 100000 events in 501.455718604 seconds, throughput 199.41940293031155 events/s, CPU usage: 100.0%
+[SiPixelRawToClusterGPUKernel.makeClusters] completed in 486826ms
+[RawToDigi_kernel] completed in 95324ms
+[GPUCalibPixel.calibDigis] completed in 47620ms
+[GPUCalibPixel.countModules] completed in 5740ms
+[GPUClustering.findClus] completed in 312500ms
+[GPUClustering.clusterChargeCut] completed in 9437ms
+                                                                                                   8:26.759s 
+ home ❯ Documents ❯ pixeltrack-standalone ❯ src ❯ mojo-serial ( profiling)
+❯_: ./mojo-serial --maxEvents 100000 --warmupEvents 1000
+Processing 100000 events after 1000 events of warm up, with 1 concurrent events and 1 threads.
+Processed 100000 events in 482.801980278 seconds, throughput 207.1242540107633 events/s, CPU usage: 100.0%
+[SiPixelRawToClusterGPUKernel.makeClusters] completed in 467523ms
+[RawToDigi_kernel] completed in 78307ms
+[GPUCalibPixel.calibDigis] completed in 47694ms
+[GPUCalibPixel.countModules] completed in 5935ms
+[GPUClustering.findClus] completed in 311265ms
+[GPUClustering.clusterChargeCut] completed in 9464ms
+                                                                                                    8:7.911s 
+ home ❯ Documents ❯ pixeltrack-standalone ❯ src ❯ mojo-serial ( profiling)
+❯_: ./mojo-serial --maxEvents 100000 --warmupEvents 1000
+Processing 100000 events after 1000 events of warm up, with 1 concurrent events and 1 threads.
+Processed 100000 events in 480.499947848 seconds, throughput 208.1165678536842 events/s, CPU usage: 100.0%
+[SiPixelRawToClusterGPUKernel.makeClusters] completed in 466225ms
+[RawToDigi_kernel] completed in 78810ms
+[GPUCalibPixel.calibDigis] completed in 48131ms
+[GPUCalibPixel.countModules] completed in 5733ms
+[GPUClustering.findClus] completed in 308710ms
+[GPUClustering.clusterChargeCut] completed in 9449ms
+                                                                                                    8:5.605s 

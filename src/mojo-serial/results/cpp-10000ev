@@ -1,0 +1,50 @@
+ home ❯ Documents ❯ pixeltrack-standalone ( master)
+❯_: ./serial --maxEvents 10000 --warmupEvents 1000
+Processing 10000 events, after 1000 events of warm up, with 1 concurrent events and 1 threads.
+Processed 10000 events in 5.666760e+01 seconds, throughput 176.468 events/s, CPU usage per thread: 100.0%
+                                                                                                     1:2.67s 
+ home ❯ Documents ❯ pixeltrack-standalone ( master)
+❯_: ./serial --maxEvents 10000 --warmupEvents 1000
+Processing 10000 events, after 1000 events of warm up, with 1 concurrent events and 1 threads.
+Processed 10000 events in 5.720619e+01 seconds, throughput 174.806 events/s, CPU usage per thread: 100.0%
+                                                                                                      1:3.3s 
+ home ❯ Documents ❯ pixeltrack-standalone ( master)
+❯_: ./serial --maxEvents 10000 --warmupEvents 1000
+Processing 10000 events, after 1000 events of warm up, with 1 concurrent events and 1 threads.
+Processed 10000 events in 6.304851e+01 seconds, throughput 158.608 events/s, CPU usage per thread: 100.0%
+                                                                                                    1:9.674s 
+ home ❯ Documents ❯ pixeltrack-standalone ( master)
+❯_: ./serial --maxEvents 10000 --warmupEvents 1000
+Processing 10000 events, after 1000 events of warm up, with 1 concurrent events and 1 threads.
+Processed 10000 events in 5.704374e+01 seconds, throughput 175.304 events/s, CPU usage per thread: 100.0%
+                                                                                                    1:3.101s 
+ home ❯ Documents ❯ pixeltrack-standalone ( master)
+❯_: ./serial --maxEvents 10000 --warmupEvents 1000
+Processing 10000 events, after 1000 events of warm up, with 1 concurrent events and 1 threads.
+Processed 10000 events in 5.705442e+01 seconds, throughput 175.271 events/s, CPU usage per thread: 100.0%
+                                                                                                     1:3.12s 
+ home ❯ Documents ❯ pixeltrack-standalone ( master)
+❯_: ./serial --maxEvents 10000 --warmupEvents 1000
+Processing 10000 events, after 1000 events of warm up, with 1 concurrent events and 1 threads.
+Processed 10000 events in 5.737864e+01 seconds, throughput 174.281 events/s, CPU usage per thread: 100.0%
+                                                                                                    1:3.451s 
+ home ❯ Documents ❯ pixeltrack-standalone ( master)
+❯_: ./serial --maxEvents 10000 --warmupEvents 1000
+Processing 10000 events, after 1000 events of warm up, with 1 concurrent events and 1 threads.
+Processed 10000 events in 5.657032e+01 seconds, throughput 176.771 events/s, CPU usage per thread: 100.0%
+                                                                                                     1:2.57s 
+ home ❯ Documents ❯ pixeltrack-standalone ( master)
+❯_: ./serial --maxEvents 10000 --warmupEvents 1000
+Processing 10000 events, after 1000 events of warm up, with 1 concurrent events and 1 threads.
+Processed 10000 events in 5.727703e+01 seconds, throughput 174.59 events/s, CPU usage per thread: 99.9%
+                                                                                                    1:3.308s 
+ home ❯ Documents ❯ pixeltrack-standalone ( master)
+❯_: ./serial --maxEvents 10000 --warmupEvents 1000
+Processing 10000 events, after 1000 events of warm up, with 1 concurrent events and 1 threads.
+Processed 10000 events in 6.299378e+01 seconds, throughput 158.746 events/s, CPU usage per thread: 100.0%
+                                                                                                    1:9.644s 
+ home ❯ Documents ❯ pixeltrack-standalone ( master)
+❯_: ./serial --maxEvents 10000 --warmupEvents 1000
+Processing 10000 events, after 1000 events of warm up, with 1 concurrent events and 1 threads.
+Processed 10000 events in 5.706810e+01 seconds, throughput 175.229 events/s, CPU usage per thread: 100.0%
+                                                                                                    1:3.099s 
