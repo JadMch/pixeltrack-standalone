@@ -20,8 +20,8 @@ struct PixelCPEFastESProducer(Defaultable, ESProducer, Movable, Typeable):
     @always_inline
     fn produce(mut self, mut eventSetup: EventSetup):
         try:
-            eventSetup.put[TypeableOwnedPointer[PixelCPEFast]](
-                TypeableOwnedPointer(PixelCPEFast(self._data / "cpefast.bin"))
+            eventSetup.put[PixelCPEFast](
+                PixelCPEFast(self._data / "cpefast.bin")
             )
         except e:
             print(

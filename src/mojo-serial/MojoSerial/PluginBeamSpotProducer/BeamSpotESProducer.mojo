@@ -6,9 +6,13 @@ from MojoSerial.DataFormats.BeamSpotPOD import BeamSpotPOD
 from MojoSerial.Framework.ESProducer import ESProducer
 from MojoSerial.Framework.EventSetup import EventSetup
 from MojoSerial.MojoBridge.DTypes import Typeable, TypeableOwnedPointer
+from MojoSerial.MojoBridge.DTypes import Char, Typeable, UChar
+from MojoSerial.MojoBridge.File import read_obj
 
-
-struct BeamSpotESProducer(Defaultable, ESProducer, Movable, Typeable):
+@fieldwise_init
+struct BeamSpotESProducer(
+    Defaultable, ESProducer, Movable, Typeable
+):
     var _data: Path
 
     @always_inline
@@ -16,19 +20,19 @@ struct BeamSpotESProducer(Defaultable, ESProducer, Movable, Typeable):
         self._data = Path("")
 
     @always_inline
-    fn __init__(out self, var path: Path):
-        self._data = path^
-
-    @always_inline
     fn produce(mut self, mut eventSetup: EventSetup):
-        var bs = TypeableOwnedPointer(BeamSpotPOD())
         try:
-            with open(self._data / "beamspot.bin", "r") as f:
-                bs._ptr[] = rebind[BeamSpotPOD](f.read_bytes())
-            eventSetup.put[TypeableOwnedPointer[BeamSpotPOD]](bs^)
+            with open(self._data / "beamspot.bin", "r") as file:
+                var bs = read_obj[BeamSpotPOD](file)
+                eventSetup.put[BeamSpotPOD](
+                    bs
+                )
         except e:
             print(
-                "Error during loading data in BeamSpotESProducer:",
+                (
+                    "Error during loading data in"
+                    " BeamSpotESProducer:"
+                ),
                 e,
             )
 

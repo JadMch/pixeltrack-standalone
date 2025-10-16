@@ -23,7 +23,7 @@ struct BeamSpotToPOD(Defaultable, EDProducer, Typeable):
 
     fn produce(mut self, mut iEvent: Event, ref iSetup: EventSetup):
         try:
-            iEvent.put(
+            iEvent.put[BeamSpotPOD](
                 self.bsPutToken_,
                 iSetup.get[BeamSpotPOD](),
             )
