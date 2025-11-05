@@ -1,4 +1,4 @@
-from memory import bitcast
+from memory import bitcast, OwnedPointer
 
 alias SizeType = UInt32  # size_t
 alias Short = Int16  # short
@@ -66,3 +66,16 @@ struct TypeableUInt(Copyable, Movable, Typeable):
     @staticmethod
     fn dtype() -> String:
         return "TypeableUInt"
+
+
+@register_passable
+struct TypeableOwnedPointer[T: Typeable & Movable](Movable, Typeable):
+    var _ptr: OwnedPointer[T]
+
+    fn __init__(out self, var value: T):
+        self._ptr = OwnedPointer(value^)
+
+    @always_inline
+    @staticmethod
+    fn dtype() -> String:
+        return "TypeableOwnedPointer[" + T.dtype() + "]"
