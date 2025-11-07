@@ -18,7 +18,7 @@ from MojoSerial.CUDADataFormats.TrackingRecHit2DSOAView import (
 from MojoSerial.PluginSiPixelRecHits.PixelRecHits import (
     PixelRecHitGPUKernel,
 )  # TODO : spit product from kernel
-from MojoSerial.MojoBridge.DTypes import Typeable, TypeableOwnedPointer
+from MojoSerial.MojoBridge.DTypes import Typeable
 
 
 struct SiPixelRecHitCUDA(Defaultable, EDProducer, Typeable):

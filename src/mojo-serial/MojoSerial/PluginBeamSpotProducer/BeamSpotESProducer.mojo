@@ -5,7 +5,7 @@ from memory import memcpy
 from MojoSerial.DataFormats.BeamSpotPOD import BeamSpotPOD
 from MojoSerial.Framework.ESProducer import ESProducer
 from MojoSerial.Framework.EventSetup import EventSetup
-from MojoSerial.MojoBridge.DTypes import Typeable, TypeableOwnedPointer
+from MojoSerial.MojoBridge.DTypes import Typeable
 from MojoSerial.MojoBridge.DTypes import Char, Typeable, UChar
 from MojoSerial.MojoBridge.File import read_obj
 
