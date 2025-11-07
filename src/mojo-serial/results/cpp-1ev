@@ -1,0 +1,50 @@
+ home ❯ Documents ❯ pixeltrack-standalone ( master)
+❯_: ./serial --maxEvents 1 --warmupEvents 1000
+Processing 1 events, after 1000 events of warm up, with 1 concurrent events and 1 threads.
+Processed 1 events in 5.232000e-03 seconds, throughput 191.131 events/s, CPU usage per thread: 100.1%
+                                                                                                      6.058s 
+ home ❯ Documents ❯ pixeltrack-standalone ( master)
+❯_: ./serial --maxEvents 1 --warmupEvents 1000
+Processing 1 events, after 1000 events of warm up, with 1 concurrent events and 1 threads.
+Processed 1 events in 5.300000e-03 seconds, throughput 188.679 events/s, CPU usage per thread: 100.0%
+                                                                                                      6.015s 
+ home ❯ Documents ❯ pixeltrack-standalone ( master)
+❯_: ./serial --maxEvents 1 --warmupEvents 1000
+Processing 1 events, after 1000 events of warm up, with 1 concurrent events and 1 threads.
+Processed 1 events in 5.163000e-03 seconds, throughput 193.686 events/s, CPU usage per thread: 100.0%
+                                                                                                      6.002s 
+ home ❯ Documents ❯ pixeltrack-standalone ( master)
+❯_: ./serial --maxEvents 1 --warmupEvents 1000
+Processing 1 events, after 1000 events of warm up, with 1 concurrent events and 1 threads.
+Processed 1 events in 5.122000e-03 seconds, throughput 195.236 events/s, CPU usage per thread: 100.0%
+                                                                                                      6.047s 
+ home ❯ Documents ❯ pixeltrack-standalone ( master)
+❯_: ./serial --maxEvents 1 --warmupEvents 1000
+Processing 1 events, after 1000 events of warm up, with 1 concurrent events and 1 threads.
+Processed 1 events in 5.049000e-03 seconds, throughput 198.059 events/s, CPU usage per thread: 100.1%
+                                                                                                      5.994s 
+ home ❯ Documents ❯ pixeltrack-standalone ( master)
+❯_: ./serial --maxEvents 1 --warmupEvents 1000
+Processing 1 events, after 1000 events of warm up, with 1 concurrent events and 1 threads.
+Processed 1 events in 5.717000e-03 seconds, throughput 174.917 events/s, CPU usage per thread: 100.1%
+                                                                                                       6.59s 
+ home ❯ Documents ❯ pixeltrack-standalone ( master)
+❯_: ./serial --maxEvents 1 --warmupEvents 1000
+Processing 1 events, after 1000 events of warm up, with 1 concurrent events and 1 threads.
+Processed 1 events in 5.281000e-03 seconds, throughput 189.358 events/s, CPU usage per thread: 100.0%
+                                                                                                      6.045s 
+ home ❯ Documents ❯ pixeltrack-standalone ( master)
+❯_: ./serial --maxEvents 1 --warmupEvents 1000
+Processing 1 events, after 1000 events of warm up, with 1 concurrent events and 1 threads.
+Processed 1 events in 5.691000e-03 seconds, throughput 175.716 events/s, CPU usage per thread: 100.0%
+                                                                                                      6.628s 
+ home ❯ Documents ❯ pixeltrack-standalone ( master)
+❯_: ./serial --maxEvents 1 --warmupEvents 1000
+Processing 1 events, after 1000 events of warm up, with 1 concurrent events and 1 threads.
+Processed 1 events in 5.297000e-03 seconds, throughput 188.786 events/s, CPU usage per thread: 100.1%
+                                                                                                          6s 
+ home ❯ Documents ❯ pixeltrack-standalone ( master)
+❯_: ./serial --maxEvents 1 --warmupEvents 1000
+Processing 1 events, after 1000 events of warm up, with 1 concurrent events and 1 threads.
+Processed 1 events in 5.116000e-03 seconds, throughput 195.465 events/s, CPU usage per thread: 100.1%
+                                                                                                      6.004s 

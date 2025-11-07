@@ -1,0 +1,48 @@
+ home ❯ Documents ❯ pixeltrack-standalone ❯ src ❯ mojo-serial ( master)
+❯_: /usr/bin/time -f "Elapsed Wall Clock Time: %E\nCPU Time: %S (system) + %U (user)\nMaximum Memory: %M KB" ./mojo-serial --maxEvents 1 --warmupEvents 1000
+Processing 1 events after 1000 events of warm up, with 1 concurrent events and 1 threads.
+Processed 1 events in 0.004153037 seconds, throughput 240.78764528223562 events/s, CPU usage: 100.0%
+Elapsed Wall Clock Time: 0:05.17
+CPU Time: 0.20 (system) + 4.96 (user)
+Maximum Memory: 435096 KB
+                                                                                                      5.181s 
+ home ❯ Documents ❯ pixeltrack-standalone ❯ src ❯ mojo-serial ( master)
+❯_: /usr/bin/time -f "Elapsed Wall Clock Time: %E\nCPU Time: %S (system) + %U (user)\nMaximum Memory: %M KB" ./mojo-serial --maxEvents 10 --warmupEvents 1000
+Processing 10 events after 1000 events of warm up, with 1 concurrent events and 1 threads.
+Processed 10 events in 0.04742148 seconds, throughput 210.87490310298202 events/s, CPU usage: 100.0%
+Elapsed Wall Clock Time: 0:05.16
+CPU Time: 0.21 (system) + 4.95 (user)
+Maximum Memory: 435076 KB
+                                                                                                      5.177s 
+ home ❯ Documents ❯ pixeltrack-standalone ❯ src ❯ mojo-serial ( master)
+❯_: /usr/bin/time -f "Elapsed Wall Clock Time: %E\nCPU Time: %S (system) + %U (user)\nMaximum Memory: %M KB" ./mojo-serial --maxEvents 100 --warmupEvents 1000
+Processing 100 events after 1000 events of warm up, with 1 concurrent events and 1 threads.
+Processed 100 events in 0.485265587 seconds, throughput 206.07272116330805 events/s, CPU usage: 100.0%
+Elapsed Wall Clock Time: 0:05.60
+CPU Time: 0.22 (system) + 5.38 (user)
+Maximum Memory: 431932 KB
+                                                                                                      5.611s 
+ home ❯ Documents ❯ pixeltrack-standalone ❯ src ❯ mojo-serial ( master)
+❯_: /usr/bin/time -f "Elapsed Wall Clock Time: %E\nCPU Time: %S (system) + %U (user)\nMaximum Memory: %M KB" ./mojo-serial --maxEvents 1000 --warmupEvents 1000
+Processing 1000 events after 1000 events of warm up, with 1 concurrent events and 1 threads.
+Processed 1000 events in 4.884344943 seconds, throughput 204.73574484806815 events/s, CPU usage: 100.0%
+Elapsed Wall Clock Time: 0:10.01
+CPU Time: 0.20 (system) + 9.80 (user)
+Maximum Memory: 431808 KB
+                                                                                                     10.026s 
+ home ❯ Documents ❯ pixeltrack-standalone ❯ src ❯ mojo-serial ( master)
+❯_: /usr/bin/time -f "Elapsed Wall Clock Time: %E\nCPU Time: %S (system) + %U (user)\nMaximum Memory: %M KB" ./mojo-serial --maxEvents 10000 --warmupEvents 1000
+Processing 10000 events after 1000 events of warm up, with 1 concurrent events and 1 threads.
+Processed 10000 events in 48.277440116 seconds, throughput 207.13608625420514 events/s, CPU usage: 100.0%
+Elapsed Wall Clock Time: 0:53.39
+CPU Time: 0.18 (system) + 53.20 (user)
+Maximum Memory: 432192 KB
+                                                                                                     53.406s 
+ home ❯ Documents ❯ pixeltrack-standalone ❯ src ❯ mojo-serial ( master)
+❯_: /usr/bin/time -f "Elapsed Wall Clock Time: %E\nCPU Time: %S (system) + %U (user)\nMaximum Memory: %M KB" ./mojo-serial --maxEvents 100000 --warmupEvents 1000
+Processing 100000 events after 1000 events of warm up, with 1 concurrent events and 1 threads.
+Processed 100000 events in 484.662707162 seconds, throughput 206.3290583786854 events/s, CPU usage: 100.0%
+Elapsed Wall Clock Time: 8:09.80
+CPU Time: 0.20 (system) + 489.55 (user)
+Maximum Memory: 432480 KB
+                                                                                                    8:9.817s 

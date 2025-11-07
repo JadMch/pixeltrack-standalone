@@ -83,6 +83,8 @@ fn main() raises:
     var _edreg = MojoSerial.Framework.PluginFactory.Registry()
     if not empty:
         MojoSerial.PluginSiPixelClusterizer.init(_esreg, _edreg)
+        MojoSerial.PluginBeamSpotProducer.init(_esreg, _edreg)
+        MojoSerial.PluginSiPixelRecHits.init(_esreg, _edreg)
 
     var processor = EventProcessor(
         warmupEvents, maxEvents, runForMinutes, path, False, _esreg, _edreg

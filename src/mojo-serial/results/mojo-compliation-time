@@ -1,0 +1,15 @@
+ home ❯ Documents ❯ pixeltrack-standalone ❯ src ❯ mojo-serial ( master)
+❯_: mojo build -D ASSERT=none main.mojo -o mojo-serial -O3 -j$(nproc) -g0 --march=native
+                                                                                                       4.76s 
+
+ home ❯ Documents ❯ pixeltrack-standalone ❯ src ❯ mojo-serial ( master)
+❯_: mojo build -D ASSERT=none main.mojo -o mojo-serial -O3 -j$(nproc) -g0 --march=native
+                                                                                                      3.239s 
+
+ home ❯ Documents ❯ pixeltrack-standalone ❯ src ❯ mojo-serial ( master)
+❯_: mojo build -D ASSERT=none main.mojo -o mojo-serial -O3 -j$(nproc) -g0 --march=native
+                                                                                                      1.347s 
+
+ home ❯ Documents ❯ pixeltrack-standalone ❯ src ❯ mojo-serial ( master)
+❯_: mojo build -D ASSERT=none main.mojo -o mojo-serial -O3 -j$(nproc) -g0 --march=native
+                                                                                                      1.353s 

@@ -1,0 +1,60 @@
+ home ❯ Documents ❯ pixeltrack-standalone ( master)
+❯_: ./serial --maxEvents 10 --warmupEvents 1000
+Processing 10 events, after 1000 events of warm up, with 1 concurrent events and 1 threads.
+Processed 10 events in 5.519500e-02 seconds, throughput 181.176 events/s, CPU usage per thread: 100.0%
+                                                                                                      6.118s 
+ home ❯ Documents ❯ pixeltrack-standalone ( master)
+❯_: ./serial --maxEvents 10 --warmupEvents 1000
+Processing 10 events, after 1000 events of warm up, with 1 concurrent events and 1 threads.
+Processed 10 events in 5.611700e-02 seconds, throughput 178.199 events/s, CPU usage per thread: 100.0%
+                                                                                                      6.178s 
+ home ❯ Documents ❯ pixeltrack-standalone ( master)
+❯_: ./serial --maxEvents 10 --warmupEvents 1000
+Processing 10 events, after 1000 events of warm up, with 1 concurrent events and 1 threads.
+Processed 10 events in 6.106100e-02 seconds, throughput 163.771 events/s, CPU usage per thread: 100.0%
+                                                                                                      6.702s 
+ home ❯ Documents ❯ pixeltrack-standalone ( master)
+❯_: ./serial --maxEvents 10 --warmupEvents 1000
+Processing 10 events, after 1000 events of warm up, with 1 concurrent events and 1 threads.
+Processed 10 events in 5.505300e-02 seconds, throughput 181.643 events/s, CPU usage per thread: 100.0%
+                                                                                                      6.056s 
+ home ❯ Documents ❯ pixeltrack-standalone ( master)
+❯_: ./serial --maxEvents 10 --warmupEvents 1000
+Processing 10 events, after 1000 events of warm up, with 1 concurrent events and 1 threads.
+Processed 10 events in 5.519300e-02 seconds, throughput 181.182 events/s, CPU usage per thread: 100.0%
+                                                                                                       6.08s 
+ home ❯ Documents ❯ pixeltrack-standalone ( master)
+❯_: ./serial --maxEvents 10 --warmupEvents 1000
+Processing 10 events, after 1000 events of warm up, with 1 concurrent events and 1 threads.
+Processed 10 events in 5.509100e-02 seconds, throughput 181.518 events/s, CPU usage per thread: 100.0%
+                                                                                                       6.08s 
+ home ❯ Documents ❯ pixeltrack-standalone ( master)
+❯_: ./serial --maxEvents 10 --warmupEvents 1000
+Processing 10 events, after 1000 events of warm up, with 1 concurrent events and 1 threads.
+Processed 10 events in 5.561600e-02 seconds, throughput 179.804 events/s, CPU usage per thread: 100.0%
+                                                                                                      6.145s 
+ home ❯ Documents ❯ pixeltrack-standalone ( master)
+❯_: ./serial --maxEvents 10 --warmupEvents 1000
+Processing 10 events, after 1000 events of warm up, with 1 concurrent events and 1 threads.
+Processed 10 events in 5.477900e-02 seconds, throughput 182.552 events/s, CPU usage per thread: 100.0%
+                                                                                                      6.079s 
+ home ❯ Documents ❯ pixeltrack-standalone ( master)
+❯_: ./serial --maxEvents 10 --warmupEvents 1000
+Processing 10 events, after 1000 events of warm up, with 1 concurrent events and 1 threads.
+Processed 10 events in 6.099500e-02 seconds, throughput 163.948 events/s, CPU usage per thread: 100.0%
+                                                                                                      6.718s 
+ home ❯ Documents ❯ pixeltrack-standalone ( master)
+❯_: ./serial --maxEvents 10 --warmupEvents 1000
+Processing 10 events, after 1000 events of warm up, with 1 concurrent events and 1 threads.
+Processed 10 events in 5.459100e-02 seconds, throughput 183.18 events/s, CPU usage per thread: 100.0%
+                                                                                                      6.074s 
+ home ❯ Documents ❯ pixeltrack-standalone ( master)
+❯_: ./serial --maxEvents 10 --warmupEvents 1000
+Processing 10 events, after 1000 events of warm up, with 1 concurrent events and 1 threads.
+Processed 10 events in 5.532000e-02 seconds, throughput 180.766 events/s, CPU usage per thread: 100.0%
+                                                                                                       6.09s 
+ home ❯ Documents ❯ pixeltrack-standalone ( master)
+❯_: ./serial --maxEvents 10 --warmupEvents 1000
+Processing 10 events, after 1000 events of warm up, with 1 concurrent events and 1 threads.
+Processed 10 events in 5.670600e-02 seconds, throughput 176.348 events/s, CPU usage per thread: 100.0%
+                                                                                                       6.11s 

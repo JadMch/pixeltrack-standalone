@@ -1,0 +1,34 @@
+ home ❯ Documents ❯ pixeltrack-standalone ( master)
+❯_: uname -r
+6.12.41+deb13-amd64
+                                                                                                      0.008s 
+ home ❯ Documents ❯ pixeltrack-standalone ( master)
+❯_: fastfetch
+        _,met$$$$$gg.          aelbizri@ahmadbassamelbizri
+     ,g$$$$$$$$$$$$$$$P.       ---------------------------
+   ,g$$P""       """Y$$.".     OS: Debian GNU/Linux 13 (trixie) x86_64
+  ,$$P'              `$$$.     Host: Victus by HP 15L Gaming Desktop TG02-0xxx
+',$$P       ,ggs.     `$$b:    Kernel: Linux 6.12.41+deb13-amd64
+`d$$'     ,$P"'   .    $$$     Uptime: 4 hours, 5 mins
+ $$P      d$'     ,    $$P     Packages: 2566 (dpkg)
+ $$:      $$.   -    ,d$$'     Shell: bash 5.2.37
+ $$;      Y$b._   _,d$P'       Display (T32p-30): 3840x2160 @ 60 Hz in 31" [External]
+ Y$$.    `.`"Y$$$$P"'          DE: KDE Plasma 6.3.6
+ `$$b      "-.__               WM: KWin (X11)
+  `Y$$b                        WM Theme: Breeze
+   `Y$$.                       Theme: Breeze (Dark) [Qt], Breeze-Dark [GTK2], Breeze [GTK3]
+     `$$b.                     Icons: breeze-dark [Qt], breeze-dark [GTK2/3/4]
+       `Y$$b.                  Font: Noto Sans (10pt) [Qt], Noto Sans (10pt) [GTK2/3/4]
+         `"Y$b._               Cursor: breeze (24px)
+             `""""             Terminal: konsole 25.4.2
+                               CPU: AMD Ryzen 7 5700G (16) @ 3.80 GHz
+                               GPU 1: NVIDIA GeForce RTX 4060 [Discrete]
+                               GPU 2: AMD Radeon Vega Series / Radeon Vega Mobile Series [Integrated]
+                               Memory: 2.42 GiB / 30.70 GiB (8%)
+                               Swap: 0 B / 31.34 GiB (0%)
+                               Disk (/): 95.92 GiB / 906.03 GiB (11%) - ext4
+                               Locale: en_US.UTF-8
+
+
+
+                                                                                                       0.02s 

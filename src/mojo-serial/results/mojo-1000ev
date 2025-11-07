@@ -1,0 +1,50 @@
+ home ❯ Documents ❯ pixeltrack-standalone ❯ src ❯ mojo-serial ( master)
+❯_: ./mojo-serial --maxEvents 1000 --warmupEvents 1000
+Processing 1000 events after 1000 events of warm up, with 1 concurrent events and 1 threads.
+Processed 1000 events in 4.819493073 seconds, throughput 207.49070179232103 events/s, CPU usage: 100.0%
+                                                                                                      9.949s 
+ home ❯ Documents ❯ pixeltrack-standalone ❯ src ❯ mojo-serial ( master)
+❯_: ./mojo-serial --maxEvents 1000 --warmupEvents 1000
+Processing 1000 events after 1000 events of warm up, with 1 concurrent events and 1 threads.
+Processed 1000 events in 4.876600076 seconds, throughput 205.06089989241923 events/s, CPU usage: 100.0%
+                                                                                                     10.049s 
+ home ❯ Documents ❯ pixeltrack-standalone ❯ src ❯ mojo-serial ( master)
+❯_: ./mojo-serial --maxEvents 1000 --warmupEvents 1000
+Processing 1000 events after 1000 events of warm up, with 1 concurrent events and 1 threads.
+Processed 1000 events in 4.901022009 seconds, throughput 204.0390755568223 events/s, CPU usage: 100.0%
+                                                                                                      10.08s 
+ home ❯ Documents ❯ pixeltrack-standalone ❯ src ❯ mojo-serial ( master)
+❯_: ./mojo-serial --maxEvents 1000 --warmupEvents 1000
+Processing 1000 events after 1000 events of warm up, with 1 concurrent events and 1 threads.
+Processed 1000 events in 4.856168473 seconds, throughput 205.92366297832103 events/s, CPU usage: 100.0%
+                                                                                                      9.987s 
+ home ❯ Documents ❯ pixeltrack-standalone ❯ src ❯ mojo-serial ( master)
+❯_: ./mojo-serial --maxEvents 1000 --warmupEvents 1000
+Processing 1000 events after 1000 events of warm up, with 1 concurrent events and 1 threads.
+Processed 1000 events in 4.812574486 seconds, throughput 207.7889917151508 events/s, CPU usage: 100.0%
+                                                                                                      9.904s 
+ home ❯ Documents ❯ pixeltrack-standalone ❯ src ❯ mojo-serial ( master)
+❯_: ./mojo-serial --maxEvents 1000 --warmupEvents 1000
+Processing 1000 events after 1000 events of warm up, with 1 concurrent events and 1 threads.
+Processed 1000 events in 4.813566224 seconds, throughput 207.74618099447594 events/s, CPU usage: 100.0%
+                                                                                                      9.931s 
+ home ❯ Documents ❯ pixeltrack-standalone ❯ src ❯ mojo-serial ( master)
+❯_: ./mojo-serial --maxEvents 1000 --warmupEvents 1000
+Processing 1000 events after 1000 events of warm up, with 1 concurrent events and 1 threads.
+Processed 1000 events in 4.852804291 seconds, throughput 206.06641851487763 events/s, CPU usage: 100.0%
+                                                                                                      9.976s 
+ home ❯ Documents ❯ pixeltrack-standalone ❯ src ❯ mojo-serial ( master)
+❯_: ./mojo-serial --maxEvents 1000 --warmupEvents 1000
+Processing 1000 events after 1000 events of warm up, with 1 concurrent events and 1 threads.
+Processed 1000 events in 4.806234414 seconds, throughput 208.06309344527946 events/s, CPU usage: 100.0%
+                                                                                                      9.906s 
+ home ❯ Documents ❯ pixeltrack-standalone ❯ src ❯ mojo-serial ( master)
+❯_: ./mojo-serial --maxEvents 1000 --warmupEvents 1000
+Processing 1000 events after 1000 events of warm up, with 1 concurrent events and 1 threads.
+Processed 1000 events in 4.804681067 seconds, throughput 208.1303599667212 events/s, CPU usage: 100.0%
+                                                                                                      9.911s 
+ home ❯ Documents ❯ pixeltrack-standalone ❯ src ❯ mojo-serial ( master)
+❯_: ./mojo-serial --maxEvents 1000 --warmupEvents 1000
+Processing 1000 events after 1000 events of warm up, with 1 concurrent events and 1 threads.
+Processed 1000 events in 4.842685262 seconds, throughput 206.49700442993606 events/s, CPU usage: 100.0%
+                                                                                                      9.937s 
