@@ -5,7 +5,7 @@ from MojoSerial.Framework.ProductRegistry import ProductRegistry
 from MojoSerial.Framework.EDPutToken import EDPutTokenT
 
 from MojoSerial.DataFormats.BeamSpotPOD import BeamSpotPOD
-from MojoSerial.MojoBridge.DTypes import Typeable, TypeableOwnedPointer
+from MojoSerial.MojoBridge.DTypes import Typeable
 
 
 struct BeamSpotToPOD(Defaultable, EDProducer, Typeable):

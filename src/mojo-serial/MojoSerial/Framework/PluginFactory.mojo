@@ -179,7 +179,6 @@ fn fwkModule[T: Typeable & EDProducer](mut reg: Registry):
     fn create_templ[
         T: Typeable & EDProducer
     ](mut reg: ProductRegistry) raises -> EDProducerWrapper:
-        # Error coming from here
         return rebind[EDProducerWrapper](EDProducerWrapperT[T](reg))
 
     @always_inline

@@ -3,7 +3,7 @@ from pathlib import Path
 from MojoSerial.CondFormats.PixelCPEFast import PixelCPEFast
 from MojoSerial.Framework.ESProducer import ESProducer
 from MojoSerial.Framework.EventSetup import EventSetup
-from MojoSerial.MojoBridge.DTypes import Typeable, TypeableOwnedPointer
+from MojoSerial.MojoBridge.DTypes import Typeable
 
 
 struct PixelCPEFastESProducer(Defaultable, ESProducer, Movable, Typeable):
