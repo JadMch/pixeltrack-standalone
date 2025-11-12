@@ -1,6 +1,6 @@
 [workspace]
 authors = ["Ahmad Bassam El Bizri <34858431+1ahmadbassam@users.noreply.github.com>"]
-channels = ["https://conda.modular.com/max-nightly", "conda-forge"]
+channels = ["https://conda.modular.com/mojo", "conda-forge"]
 name = "mojo-serial"
 platforms = ["linux-64"]
 version = "0.1.0"
@@ -8,4 +8,4 @@ version = "0.1.0"
 [tasks]
 
 [dependencies]
-mojo = "25.5.*"
+mojo = "25.5.0"
