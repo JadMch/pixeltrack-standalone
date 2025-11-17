@@ -107,7 +107,7 @@ struct StreamSchedule(Defaultable, Movable, Typeable):
                 self._path[i].produce(event, self._eventSetup[])
             ptr = self._source[].produce(self._streamId, self._registry[])
 
-    fn endJob(mut self):
+    fn endJob(mut self) raises:
         for i in range(self._path.__len__()):
             self._path[i].endJob()
 

@@ -198,7 +198,7 @@ struct SiPixelRawToClusterCUDA(Defaultable, EDProducer, Typeable):
         except e:
             print("Error during produce in SiPixelRawToClusterCUDA, ", e)
 
-    fn endJob(mut self):
+    fn endJob(mut self) raises:
         pass
 
     @always_inline

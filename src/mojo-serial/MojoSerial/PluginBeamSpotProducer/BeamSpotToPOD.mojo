@@ -30,7 +30,7 @@ struct BeamSpotToPOD(Defaultable, EDProducer, Typeable):
         except e:
             print("Error during produce in BeamSpotToPOD, ", e)
 
-    fn endJob(mut self):
+    fn endJob(mut self) raises:
         pass
 
     @staticmethod

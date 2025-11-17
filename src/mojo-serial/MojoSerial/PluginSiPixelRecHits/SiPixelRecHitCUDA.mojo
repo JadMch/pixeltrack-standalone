@@ -80,7 +80,7 @@ struct SiPixelRecHitCUDA(Defaultable, EDProducer, Typeable):
         except e:
             print("Error during produce in SiPixelRecHitCUDA, ", e)
 
-    fn endJob(mut self):
+    fn endJob(mut self) raises:
         pass
 
     @staticmethod

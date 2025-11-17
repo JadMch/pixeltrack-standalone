@@ -11,5 +11,5 @@ trait EDProducer(Defaultable):
     fn produce(mut self, mut event: Event, ref eventSetup: EventSetup):
         ...
 
-    fn endJob(mut self):
+    fn endJob(mut self) raises:
         ...

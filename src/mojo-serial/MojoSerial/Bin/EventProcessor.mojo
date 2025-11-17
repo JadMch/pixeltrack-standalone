@@ -98,7 +98,7 @@ struct EventProcessor(Defaultable, Typeable):
         self._schedule.run()
 
     @always_inline
-    fn endJob(mut self):
+    fn endJob(mut self) raises:
         self._schedule.endJob()
 
     @always_inline

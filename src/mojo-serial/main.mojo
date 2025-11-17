@@ -122,6 +122,8 @@ fn main() raises:
     var cpu_start = List[UInt](length=threads, fill=0)
     var cpu_end = List[UInt](length=threads, fill=0)
 
+    var processing_error = False
+
     fn worker(i : Int) capturing:
         ## Init plugins manually
         var _esreg = MojoSerial.Framework.ESPluginFactory.Registry()
@@ -148,7 +150,11 @@ fn main() raises:
         processor.runToCompletion()
         end[i] = perf_counter_ns()
         cpu_end[i] = PosixClockGettime[CLOCK_THREAD_CPUTIME_ID].now()
-        processor.endJob()
+        try:
+            processor.endJob()
+        except e:
+            processing_error = True
+            print("Error occurred while ending job ", i, ":", e)
 
         # Lifetime registry extension
         _ = _esreg^
@@ -194,3 +200,7 @@ fn main() raises:
         "%",
         sep="",
     )
+
+    if processing_error:
+        print("Processing completed with errors.")
+        exit(1)
