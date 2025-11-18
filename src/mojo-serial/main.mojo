@@ -27,6 +27,7 @@ Options:
   --runForMinutes               Continue processing the set of 1000 events until this many minutes have passed
                                 (default -1 for disabled; conflicts with --maxEvents).
   --data                        Path to the 'data' directory (default 'data' in the directory of the executable).
+  --validation                  Run (rudimentary) validation at the end.
   --empty                       Ignore all producers (for testing only).
   --threads                     Number of streams/threads to run concurrently (default 1).
 )"""
@@ -41,6 +42,7 @@ fn main() raises:
     var threads = 1
     var path = Path("")
     var empty = False
+    var validation = False
 
     var i = 1
     while i < args.__len__():
@@ -62,6 +64,8 @@ fn main() raises:
         elif args[i] == "--data":
             i += 1
             path = Path(args[i])
+        elif args[i] == "--validation":
+            validation = True
         elif args[i] == "--empty":
             empty = True
         else:
@@ -133,13 +137,16 @@ fn main() raises:
             MojoSerial.PluginBeamSpotProducer.init(_esreg, _edreg)
             MojoSerial.PluginSiPixelRecHits.init(_esreg, _edreg)
 
+        if validation:
+            MojoSerial.PluginValidation.CountValidator.init(_esreg, _edreg)
+
         var processor = EventProcessor(
             warmupEvents,
             startEvent[i],
             endEvent[i],
             runForMinutes,
             path,
-            False,
+            validation,
             _esreg,
             _edreg,
         )
