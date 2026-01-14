@@ -313,6 +313,38 @@ struct Matrix[T: DType, rows: Int, colns: Int](
     fn __len__(self) -> Int:
         return rows * colns
 
+    @always_inline
+    @staticmethod
+    fn Zero() -> Self:
+        return Self()
+
+    @always_inline
+    @staticmethod
+    fn Constant(val: Self._D) -> Self:
+        var res = Self()
+        @parameter
+        for i in range(rows * colns):
+            res[i] = val
+        return res
+
+    @staticmethod
+    @parameter
+    fn RowsAtCompileTime() -> Int:
+        return rows
+
+    @staticmethod
+    @parameter
+    fn ColsAtCompileTime() -> Int:
+        return colns
+
+    @always_inline
+    fn rows(self) -> Int:
+        return rows
+
+    @always_inline
+    fn cols(self) -> Int:
+        return colns
+
     # Operators
 
     @always_inline
