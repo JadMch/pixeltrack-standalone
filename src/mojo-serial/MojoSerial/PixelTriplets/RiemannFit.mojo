@@ -94,7 +94,13 @@ fn Scatter_cov_line[
     # Basically, to perform cwise operations on Matrices and Vectors, you need
     # to transform them into Array-like objects.
     var S_values = Rfit.VectorNd[N]()
-
+    var i = 0
+    while i < n:
+        let s_val = s_arcs[i]
+        let z_val = z_values[i]
+        S_values[i] = s_val * s_val + z_val * z_val
+        i += 1
+     
     i = 0
     while i < n:
         S_values[i] = math.sqrt(S_values[i])
@@ -122,12 +128,7 @@ fn Scatter_cov_line[
         tmp[k, k + n] = cov_sz[k][0, 1]
         tmp[k + n, k] = cov_sz[k][0, 1]
 
-    var i = 0
-    while i < n:
-        let s_val = s_arcs[i]
-        let z_val = z_values[i]
-        S_values[i] = s_val * s_val + z_val * z_val
-        i += 1
+
 
     for k in range(n):
         for l in range(k, n):
