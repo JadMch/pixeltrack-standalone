@@ -1,18 +1,17 @@
-from Eigen import Core 
-from Eigrn import Eigenvalues
+from MojoSerial.MojoBridge.Matrix import Matrix
 
 struct Rfit:
-    alias Vector2d = Eigen.Vector2d
-    alias Vector3d = Eigen.Vector3d
-    alias Vector4d = Eigen.Vector4d
-    alias Vector5d = Eigen.Matrix[double, 5, 1]
-    alias Matrix2d = Eigen.Matrix2d
-    alias Matrix3d = Eigen.Matrix3d
-    alias Matrix4d = Eigen.Matrix4d
-    alias Matrix5d = Eigen.Matrix[double, 5, 5]
-    alias Matrix6d = Eigen.Matrix[double, 6, 6]
+    alias Vector2d = Matrix[Float64, 2, 1]
+    alias Vector3d = Matrix[Float64, 3, 1]
+    alias Vector4d = Matrix[Float64, 4, 1]
+    alias Vector5d = Matrix[Float64, 5, 1]
+    alias Matrix2d = Matrix[Float64, 2, 2]
+    alias Matrix3d = Matrix[Float64, 3, 3]
+    alias Matrix4d = Matrix[Float64, 4, 4]
+    alias Matrix5d = Matrix[Float64, 5, 5]
+    alias Matrix6d = Matrix[Float64, 6, 6]
 
-    alias Matrix3xNd[N: Int] = Matrix[DType.float64, 3, N]
+    alias Matrix3xNd[N: Int] = Matrix[Float64, 3, N]
 
     struct circle_fit:
         var par : Vector3d #!< parameter: (X0,Y0,R)
