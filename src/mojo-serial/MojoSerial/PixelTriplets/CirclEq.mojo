@@ -23,7 +23,7 @@ struct CircleEq[T]:
     var m_c : T = 0
     var m_alpha : T = 0
     var m_beta : T = 0
-    fn __ini__(x1 : T, y1 : T,x2 : T, y2 : T,  x3 : T, y3 : T):
+    fn __init__(x1 : T, y1 : T,x2 : T, y2 : T,  x3 : T, y3 : T):
         self.compute(x1, y1, x2, y2, x3, y3)
 
     fn compute(self , x1 : T, y1 : T,x2 : T, y2 : T,  x3 : T, y3 : T):
@@ -41,12 +41,14 @@ struct CircleEq[T]:
         let st2 = (d12 * x3p - d32 * x1p)
         let seq = det * det + st2 * st2
         let al2 = T(1.0) / math.sqrt(seq)
+        let be2 = -st * al2
         let ct = T(2.0) *  num * al2
         self.al2 *= det
         self.m_xp = x2
         self.m_yp = y2
-        self.m_c = if noflip : al2 else : -be2
-        self.m_beta = if noflip : be2 else : -al2 
+        self.m_c = ct if noflip else -ct
+        self.m_alpha = al2 if noflip else -be2
+        self.m_beta = be2 if noflip else -al2
     #dca to origin divided by curvature
     fn dca0(self) -> T:
         let x = self.m_c * self.m_xp + self.m_alpha
@@ -59,7 +61,7 @@ struct CircleEq[T]:
         return math.sqrt(x * x + y * y) - T(1)
     
     #curvature
-    fn curative(self):
+    fn curvature(self):
         return self.m_c 
 
     fn cosdir(self, x: T, y: T) -> (T, T):
