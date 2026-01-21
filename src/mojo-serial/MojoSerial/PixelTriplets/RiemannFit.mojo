@@ -11,10 +11,33 @@ from MojoSerial.MojoBridge.SymmetricEigen import (
 )
 
 
+#/*!  Compute the Radiation length in the uniform hypothesis
+# *
+# * The Pixel detector, barrel and forward, is considered as an omogeneous
+# * cilinder of material, whose radiation lengths has been derived from the TDR
+# * plot that shows that 16cm correspond to 0.06 radiation lengths. Therefore
+# * one radiation length corresponds to 16cm/0.06 =~ 267 cm. All radiation
+# * lengths are computed using this unique number, in both regions, barrel and
+# * endcap.
+# *
+# * NB: no angle corrections nor projections are computed inside this routine.
+# * It is therefore the responsibility of the caller to supply the proper
+# * lengths in input. These lenghts are the path travelled by the particle along
+# * its trajectory, namely the so called S of the helix in 3D space.
+# *
+# * \param length_values vector of incremental distances that will be translated
+# * into radiation length equivalent. Each radiation length i is computed
+# * incrementally with respect to the previous length i-1. The first lenght has
+# * no reference point (i.e. it has the dca).
+# *
+# * \return incremental radiation lengths that correspond to each segment.
+# */
 fn computeRadLenUniformMaterial[
     VNd1: AnyType,
     VNd2: AnyType,
 ](length_values: VNd1, mut rad_lengths:  VNd2):
+    # Radiation length of the pixel detector in the uniform assumption, with
+    # 0.06 rad_len at 16 cm
     comptime XX_0_inv: Float64 = 0.06 / 16.0
     let n = length_values.rows()
     rad_lengths[0] = length_values[0] * XX_0_inv
@@ -24,6 +47,24 @@ fn computeRadLenUniformMaterial[
         j += 1
 
 
+#/*!
+#   \brief Compute the covariance matrix along cartesian S-Z of points due to
+#   multiple Coulomb scattering to be used in the line_fit, for the barrel
+#   and forward cases.
+#   The input covariance matrix is in the variables s-z, original and
+#   unrotated.
+#   The multiple scattering component is computed in the usual linear
+#   approximation, using the 3D path which is computed as the squared root of
+#   the squared sum of the s and z components passed in.
+#   Internally a rotation by theta is performed and the covariance matrix
+#   returned is the one in the direction orthogonal to the rotated S3D axis,
+#   i.e. along the rotated Z axis.
+#   The choice of the rotation is not arbitrary, but derived from the fact that
+#   putting the horizontal axis along the S3D direction allows the usage of the
+#   ordinary least squared fitting techiques with the trivial parametrization y
+#   = mx + q, avoiding the patological case with m = +/- inf, that would
+#   correspond to the case at eta = 0.
+# */
 fn Scatter_cov_line[
     V4: AnyType,
     VNd1: AnyType,
@@ -44,10 +85,14 @@ fn Scatter_cov_line[
         Rfit.printIt[RFIT_DEBUG=True](UnsafePointer(to=s_arcs), "Scatter_cov_line - s_arcs: ")
 
     comptime n: Int = N
+    # limit pt to avoid too small error!!!
     var p_t = min(20.0, fast_fit[2] * B)
     var p_2 = p_t * p_t * (1.0 + 1.0 / (fast_fit[3] * fast_fit[3]))
 
     var rad_lengths_S = Rfit.VectorNd[N]()
+    # See documentation at http://eigen.tuxfamily.org/dox/group__TutorialArrayClass.html
+    # Basically, to perform cwise operations on Matrices and Vectors, you need
+    # to transform them into Array-like objects.
     var S_values = Rfit.VectorNd[N]()
 
     i = 0
@@ -100,6 +145,8 @@ fn Scatter_cov_line[
 
 
 
+    # We are interested only in the errors orthogonal to the rotated s-axis
+    # which, in our formalism, are in the lower square matrix.
     @parameter
     if is_defined["RFIT_DEBUG"]():
         Rfit.printIt[RFIT_DEBUG=True](UnsafePointer(to=tmp), "Scatter_cov_line - tmp: ")
@@ -109,6 +156,19 @@ fn Scatter_cov_line[
             ret[i, j] = tmp[i + n, j + n]
 
 
+#/*!
+#   \brief Compute the covariance matrix (in radial coordinates) of points in
+#   the transverse plane due to multiple Coulomb scattering.
+#   \param p2D 2D points in the transverse plane.
+#   \param fast_fit fast_fit Vector4d result of the previous pre-fit
+#   structured in this form:(X0, Y0, R, Tan(Theta))).
+#   \param B magnetic field use to compute p
+#   \return scatter_cov_rad errors due to multiple scattering.
+#   \warning input points must be ordered radially from the detector center
+#   (from inner layer to outer ones; points on the same layer must ordered too).
+#   \details Only the tangential component is computed (the radial one is
+#   negligible).
+# */
 fn Scatter_cov_rad[
     M2xN: AnyType,
     V4: AnyType,
@@ -120,6 +180,7 @@ fn Scatter_cov_rad[
     B: Float64,
 ) -> Rfit.MatrixNd[N]:
     comptime n: UInt32 = N
+    # limit pt to avoid too small error!!!
     var p_t = min(20.0, fast_fit[2] * B)
     var p_2 = p_t * p_t * (1.0 + 1.0 / (fast_fit[3] * fast_fit[3]))
     var theta = math.atan(fast_fit[3])
@@ -132,7 +193,8 @@ fn Scatter_cov_rad[
     o[0] = fast_fit[0]
     o[1] = fast_fit[1]
 
-    for i in range(n):
+    # associated Jacobian, used in weights and errors computation
+    for i in range(n):  # x
         let px = p2D[0, i] - o[0]
         let py = p2D[1, i] - o[1]
         var p = Rfit.Vector2d()
@@ -174,6 +236,13 @@ fn Scatter_cov_rad[
     return scatter_cov_rad
 
 
+#/*!
+#   \brief Transform covariance matrix from radial (only tangential component)
+#   to Cartesian coordinates (only transverse plane component).
+#   \param p2D 2D points in the transverse plane.
+#   \param cov_rad covariance matrix in radial coordinate.
+#   \return cov_cart covariance matrix in Cartesian coordinates.
+# */
 fn cov_radtocart[
     M2xN: AnyType,
     N: Int,
@@ -214,6 +283,16 @@ fn cov_radtocart[
     return cov_cart
 
 
+#/*!
+#   \brief Transform covariance matrix from Cartesian coordinates (only
+#   transverse plane component) to radial coordinates (both radial and
+#   tangential component but only diagonal terms, correlation between different
+#   point are not managed).
+#   \param p2D 2D points in transverse plane.
+#   \param cov_cart covariance matrix in Cartesian coordinates.
+#   \return cov_rad covariance matrix in raidal coordinate.
+#   \warning correlation between different point are not computed.
+# */
 fn cov_carttorad[
     M2xN: AnyType,
     N: Int,
@@ -230,6 +309,7 @@ fn cov_carttorad[
         rad_inv2[i] = inv * inv
 
     for i in range(n):
+        # in case you have (0,0) to avoid dividing by 0 radius
         if rad[i] < 1.0e-4:
             cov_rad[i] = cov_cart[i, i]
         else:
@@ -242,6 +322,18 @@ fn cov_carttorad[
     return cov_rad
 
 
+#/*!
+#   \brief Transform covariance matrix from Cartesian coordinates (only
+#   transverse plane component) to coordinates system orthogonal to the
+#   pre-fitted circle in each point.
+#   Further information in attached documentation.
+#   \param p2D 2D points in transverse plane.
+#   \param cov_cart covariance matrix in Cartesian coordinates.
+#   \param fast_fit fast_fit Vector4d result of the previous pre-fit
+#   structured in this form:(X0, Y0, R, tan(theta))).
+#   \return cov_rad covariance matrix in the pre-fitted circle's
+#   orthogonal system.
+# */
 fn cov_carttorad_prefit[
     M2xN: AnyType,
     V4: AnyType,
@@ -255,8 +347,9 @@ fn cov_carttorad_prefit[
     comptime n: UInt32 = N
     var cov_rad = Rfit.VectorNd[N]()
     for i in range(n):
+        # in case you have (0,0) to avoid dividing by 0 radius
         if rad[i] < 1.0e-4:
-            cov_rad[i] = cov_cart[i, i]
+            cov_rad[i] = cov_cart[i, i]  # TO FIX
         else:
             let ax = p2D[0, i]
             let ay = p2D[1, i]
@@ -281,6 +374,16 @@ fn cov_carttorad_prefit[
     return cov_rad
 
 
+#/*!
+#   \brief Compute the points' weights' vector for the circle fit when multiple
+#   scattering is managed.
+#   Further information in attached documentation.
+#   \param cov_rad_inv covariance matrix inverse in radial coordinated
+#   (or, beter, pre-fitted circle's orthogonal system).
+#   \return weight VectorNd points' weights' vector.
+#   \bug I'm not sure this is the right way to compute the weights for non
+#   diagonal cov matrix. Further investigation needed.
+# */
 fn Weight_circle[
     N: Int,
 ](cov_rad_inv: Rfit.MatrixNd[N]) -> Rfit.VectorNd[N]:
@@ -294,6 +397,14 @@ fn Weight_circle[
     return weight
 
 
+#/*!
+#   \brief Find particle q considering the  sign of cross product between
+#   particles velocity (estimated by the first 2 hits) and the vector radius
+#   between the first hit and the center of the fitted circle.
+#   \param p2D 2D points in transverse plane.
+#   \param par_uvr result of the circle fit in this form: (X0,Y0,R).
+#   \return q int 1 or -1.
+# */
 fn Charge[
     M2xN: AnyType,
 ](p2D: M2xN, par_uvr: Rfit.Vector3d) -> Int32:
@@ -304,6 +415,20 @@ fn Charge[
     return -1 if val > 0.0 else 1
 
 
+#/*!
+#   \brief Compute the eigenvector associated to the minimum eigenvalue.
+#   \param A the Matrix you want to know eigenvector and eigenvalue.
+#   \param chi2 the double were the chi2-related quantity will be stored.
+#   \return the eigenvector associated to the minimum eigenvalue.
+#   \warning double precision is needed for a correct assessment of chi2.
+#   \details The minimus eigenvalue is related to chi2.
+#   We exploit the fact that the matrix is symmetrical and small (2x2 for line
+#   fit and 3x3 for circle fit), so the SelfAdjointEigenSolver from Eigen
+#   library is used, with the computedDirect  method (available only for 2x2
+#   and 3x3 Matrix) wich computes eigendecomposition of given matrix using a
+#   fast closed-form algorithm.
+#   For this optimization the matrix type must be known at compiling time.
+# */
 fn min_eigen3D(
     A: Rfit.Matrix3d,
     chi2: inout Float64,
@@ -321,12 +446,31 @@ fn min_eigen3D(
     return v
 
 
+#/*!
+#   \brief A faster version of min_eigen3D() where double precision is not
+#   needed.
+#   \param A the Matrix you want to know eigenvector and eigenvalue.
+#   \param chi2 the double were the chi2-related quantity will be stored
+#   \return the eigenvector associated to the minimum eigenvalue.
+#   \detail The computedDirect() method of SelfAdjointEigenSolver for 3x3 Matrix
+#   indeed, use trigonometry function (it solves a third degree equation) which
+#   speed up in  single precision.
+# */
 fn min_eigen3D_fast(
     A: Rfit.Matrix3d,
 ) -> Rfit.Vector3d:
     return min_eigen_3x3_fast(A)
 
 
+#/*!
+#   \brief 2D version of min_eigen3D().
+#   \param A the Matrix you want to know eigenvector and eigenvalue.
+#   \param chi2 the double were the chi2-related quantity will be stored
+#   \return the eigenvector associated to the minimum eigenvalue.
+#   \detail The computedDirect() method of SelfAdjointEigenSolver for 2x2 Matrix
+#   do not use special math function (just sqrt) therefore it doesn't speed up
+#   significantly in single precision.
+# */
 fn min_eigen2D(
     A: Rfit.Matrix2d,
     chi2: inout Float64,
@@ -334,22 +478,38 @@ fn min_eigen2D(
     return min_eigen_2x2(A, chi2)
 
 
+#/*!
+#   \brief A very fast helix fit: it fits a circle by three points (first, middle
+#   and last point) and a line by two points (first and last).
+#   \param hits points to be fitted
+#   \return result in this form: (X0,Y0,R,tan(theta)).
+#   \warning points must be passed ordered (from internal layer to external) in
+#   order to maximize accuracy and do not mistake tan(theta) sign.
+#   \details This fast fit is used as pre-fit which is needed for:
+#   - weights estimation and chi2 computation in line fit (fundamental);
+#   - weights estimation and chi2 computation in circle fit (useful);
+#   - computation of error due to multiple scattering.
+# */
 fn Fast_fit[
     M3xN: AnyType,
     V4: AnyType,
 ](hits: M3xN, result: inout V4):
+    # get the number of hits
     let n = M3xN.ColsAtCompileTime()
 
     @parameter
     if is_defined["RFIT_DEBUG"]():
         Rfit.printIt[RFIT_DEBUG=True](UnsafePointer(to=hits), "Fast_fit - hits: ")
 
+    # CIRCLE FIT
+    # Make segments between middle-to-first(b) and last-to-first(c) hits
     let mid = n // 2
     let b0 = hits[0, mid] - hits[0, 0]
     let b1 = hits[1, mid] - hits[1, 0]
     let c0 = hits[0, n - 1] - hits[0, 0]
     let c1 = hits[1, n - 1] - hits[1, 0]
 
+    # Compute their lengths
     let b2 = b0 * b0 + b1 * b1
     let c2 = c0 * c0 + c1 * c1
 
@@ -365,13 +525,21 @@ fn Fast_fit[
         Rfit.printIt[RFIT_DEBUG=True](UnsafePointer(to=b), "Fast_fit - b: ")
         Rfit.printIt[RFIT_DEBUG=True](UnsafePointer(to=c), "Fast_fit - c: ")
 
+    # The algebra has been verified (MR). The usual approach has been followed:
+    # * use an orthogonal reference frame passing from the first point.
+    # * build the segments (chords)
+    # * build orthogonal lines through mid points
+    # * make a system and solve for X0 and Y0.
+    # * add the initial point
     let flip = abs(b0) < abs(b1)
     let bx = b1 if flip else b0
     let by = b0 if flip else b1
     let cx = c1 if flip else c0
     let cy = c0 if flip else c1
 
+    # in case b.x is 0 (2 hits with same x)
     let div = 2.0 * (cx * by - bx * cy)
+    # if aligned TO FIX
     let Y0 = (cx * b2 - bx * c2) / div
     let X0 = (0.5 * b2 - Y0 * by) / bx
 
@@ -383,6 +551,7 @@ fn Fast_fit[
     if is_defined["RFIT_DEBUG"]():
         Rfit.printIt[RFIT_DEBUG=True](UnsafePointer(to=result), "Fast_fit - result: ")
 
+    # LINE FIT
     let d0 = hits[0, 0] - result[0]
     let d1 = hits[1, 0] - result[1]
     let e0 = hits[0, n - 1] - result[0]
@@ -402,7 +571,9 @@ fn Fast_fit[
 
     let cross = Rfit.cross2D(d, e)
     let dot = d0 * e0 + d1 * e1
+    # Compute the arc-length between first and last point: L = R * theta = R * atan (tan (Theta) )
     let dr = result[2] * math.atan2(cross, dot)
+    # Simple difference in Z between last and first hit
     let dz = hits[2, n - 1] - hits[2, 0]
 
     result[3] = dr / dz
@@ -412,6 +583,33 @@ fn Fast_fit[
         print("Fast_fit: [", result[0], ", ", result[1], ", ", result[2], ", ", result[3], "]")
 
 
+#/*!
+#   \brief Fit a generic number of 2D points with a circle using Riemann-Chernov
+#   algorithm. Covariance matrix of fitted parameter is optionally computed.
+#   Multiple scattering (currently only in barrel layer) is optionally handled.
+#   \param hits2D 2D points to be fitted.
+#   \param hits_cov2D covariance matrix of 2D points.
+#   \param fast_fit pre-fit result in this form: (X0,Y0,R,tan(theta)).
+#   (tan(theta) is not used).
+#   \param B magnetic field
+#   \param error flag for error computation.
+#   \param scattering flag for multiple scattering
+#   \return circle circle_fit:
+#   -par parameter of the fitted circle in this form (X0,Y0,R); \n
+#   -cov covariance matrix of the fitted parameter (not initialized if
+#   error = false); \n
+#   -q charge of the particle; \n
+#   -chi2.
+#   \warning hits must be passed ordered from inner to outer layer (double hits
+#   on the same layer must be ordered too) so that multiple scattering is
+#   treated properly.
+#   \warning Multiple scattering for barrel is still not tested.
+#   \warning Multiple scattering for endcap hits is not handled (yet). Do not
+#   fit endcap hits with scattering = true !
+#   \bug for small pt (<0.3 Gev/c) chi2 could be slightly underestimated.
+#   \bug further investigation needed for error propagation with multiple
+#   scattering.
+# */
 fn Circle_fit[
     M2xN: AnyType,
     V4: AnyType,
@@ -428,6 +626,7 @@ fn Circle_fit[
     if is_defined["RFIT_DEBUG"]():
         print("circle_fit - enter")
 
+    # INITIALIZATION
     var V: Rfit.Matrix2Nd[N]= hits_cov2D
     comptime n: UInt32 = N
 
@@ -440,6 +639,7 @@ fn Circle_fit[
     if is_defined["RFIT_DEBUG"]():
         print("circle_fit - WEIGHT COMPUTATION")
 
+    # WEIGHT COMPUTATION
     var weight = Rfit.VectorNd[N]()
     var G = Rfit.MatrixNd[N]()
     var renorm: Float64 = 0.0
@@ -472,6 +672,7 @@ fn Circle_fit[
             Rfit.printIt[RFIT_DEBUG=True](UnsafePointer(to=cov_rad), "circle_fit - cov_rad:")
 
         choleskyInversion.invert(cov_rad, G)
+        # G = cov_rad.inverse();
         renorm = Float64(G.reduce_add())
         let scale = 1.0 / renorm
         for i in range(n):
@@ -483,9 +684,14 @@ fn Circle_fit[
     @parameter
     if is_defined["RFIT_DEBUG"]():
         Rfit.printIt[RFIT_DEBUG=True](UnsafePointer(to=weight), "circle_fit - weight:")
+        # SPACE TRANSFORMATION
         print("circle_fit - SPACE TRANSFORMATION")
+        # center
         print("Address of hits2D: b) ", UnsafePointer(to=hits2D))
 
+
+
+    # centroid
     var h_ = Rfit.Vector2d()
     var sum0: Float64 = 0.0
     var sum1: Float64 = 0.0
@@ -508,6 +714,7 @@ fn Circle_fit[
     if is_defined["RFIT_DEBUG"]():
         Rfit.printIt[RFIT_DEBUG=True](UnsafePointer(to=p3D), "circle_fit - p3D: a)")
 
+    # centered hits, used in error computation
     var mc = Rfit.Vector2Nd[N]()
     for i in range(n):
         mc[i] = p3D[0, i]
@@ -517,15 +724,18 @@ fn Circle_fit[
     if is_defined["RFIT_DEBUG"]():
         Rfit.printIt[RFIT_DEBUG=True](UnsafePointer(to=mc), "circle_fit - mc(centered hits):")
 
+    # scale
     var q: Float64 = 0.0
     for i in range(2 * n):
         q += mc[i] * mc[i]
 
+    # scaling factor
     let s = math.sqrt(Float64(n) / q)
     for i in range(3):
         for j in range(n):
             p3D[i, j] *= s
 
+    # project on paraboloid
     for i in range(n):
         p3D[2, i] = p3D[0, i] * p3D[0, i] + p3D[1, i] * p3D[1, i]
 
@@ -534,6 +744,9 @@ fn Circle_fit[
         Rfit.printIt[RFIT_DEBUG=True](UnsafePointer(to=p3D), "circle_fit - p3D: b)")
         print("circle_fit - COST FUNCTION")
 
+    # COST FUNCTION
+    # compute
+    # center of gravity
     var r0 = Rfit.Vector3d()
     for i in range(3):
         var sum: Float64 = 0.0
@@ -553,6 +766,7 @@ fn Circle_fit[
         Rfit.printIt[RFIT_DEBUG=True](UnsafePointer(to=A), "circle_fit - A:")
         print("circle_fit - MINIMIZE")
 
+    # minimize
     var chi2: Float64 = 0.0
     var v = min_eigen3D(A, chi2)
 
@@ -561,6 +775,7 @@ fn Circle_fit[
         print("circle_fit - AFTER MIN_EIGEN")
         Rfit.printIt[RFIT_DEBUG=True](UnsafePointer(to=v), "v BEFORE INVERSION")
 
+    # TO FIX dovrebbe essere N(3)>0
     if v[2] <= 0.0:
         v[0] = -v[0]
         v[1] = -v[1]
@@ -589,15 +804,19 @@ fn Circle_fit[
         print("circle_fit - AFTER MIN_EIGEN 3")
 
     let c = cm[0, 0]
+    # const double c = -v.transpose() * r0;
 
     @parameter
     if is_defined["RFIT_DEBUG"]():
         print("circle_fit - COMPUTE CIRCLE PARAMETER")
 
+    # COMPUTE CIRCLE PARAMETER
+    # auxiliary quantities
     let h = math.sqrt(1.0 - Rfit.sqr(v[2]) - 4.0 * c * v[2])
     let v2x2_inv = 1.0 / (2.0 * v[2])
     let s_inv = 1.0 / s
 
+    # used in error propagation
     var par_uvr_ = Rfit.Vector3d()
     par_uvr_[0] = -v[0] * v2x2_inv
     par_uvr_[1] = -v[1] * v2x2_inv
@@ -617,12 +836,15 @@ fn Circle_fit[
         print("circle_fit - CIRCLE CHARGE: ", circle.q)
         print("circle_fit - ERROR PROPAGATION")
 
+    # ERROR PROPAGATION
     if error:
         @parameter
         if is_defined["RFIT_DEBUG"]():
             print("circle_fit - ERROR PRPAGATION ACTIVATED")
 
+        # cov matrix of center & scaled points
         var Vcs_ = InlineArray[InlineArray[Rfit.ArrayNd[N], 2], 2]()
+        # cov matrix of 3D transformed points
         var C = InlineArray[InlineArray[Rfit.MatrixNd[N], 3], 3]()
 
         @parameter
@@ -641,6 +863,7 @@ fn Circle_fit[
                 for j in range(2 * n):
                     V_sq_norm += V[i, j] * V[i, j]
 
+            # mc.transpose() * V * mc) *
             let scale = (Rfit.sqr(s) * Rfit.sqr(s)) * (2.0 * V_sq_norm + 4.0 * c) / (4.0 * q * Float64(n))
             for i in range(2 * n):
                 for j in range(2 * n):
@@ -712,6 +935,7 @@ fn Circle_fit[
         if is_defined["RFIT_DEBUG"]():
             Rfit.printIt[RFIT_DEBUG=True](UnsafePointer(to=C[0][0]), "circle_fit - C[0][0]:")
 
+        # cov matrix of center of gravity (r0.x,r0.y,r0.z)
         var C0 = Rfit.Matrix3d()
         for i in range(3):
             for j in range(i, 3):
@@ -719,6 +943,7 @@ fn Circle_fit[
                 for a in range(n):
                     for b in range(n):
                         sum += weight[a] * C[i][j][a, b] * weight[b]
+                # weight.transpose() * C[i][j] * weight;
                 C0[i, j] = sum
                 C0[j, i] = sum
 
@@ -744,6 +969,7 @@ fn Circle_fit[
             Rfit.printIt[RFIT_DEBUG=True](UnsafePointer(to=H), "circle_fit - H:")
             Rfit.printIt[RFIT_DEBUG=True](UnsafePointer(to=s_v), "circle_fit - s_v:")
 
+        # cov(s_v)
         var D_ = InlineArray[InlineArray[Rfit.MatrixNd[N], 3], 3]()
         {
             let tmp00 = (H @ C[0][0]) @ H.transpose()
@@ -780,6 +1006,7 @@ fn Circle_fit[
             InlineArray[UInt32, 2](2, 2),
         )
 
+        # cov matrix of the 6 independent elements of A
         var E = Rfit.Matrix6d()
         for a in range(6):
             let i = nu[a][0].cast[Int]()
@@ -834,6 +1061,7 @@ fn Circle_fit[
                     for idx in range(n):
                         cm += s_v[idx, i] * t0[idx] + s_v[idx, j] * t1[idx]
 
+                # (s_v.col(i).transpose() * t0) + (s_v.col(j).transpose() * t1);
                 E[a, b] = cm
                 if b != a:
                     E[b, a] = E[a, b]
@@ -842,6 +1070,7 @@ fn Circle_fit[
         if is_defined["RFIT_DEBUG"]():
             Rfit.printIt[RFIT_DEBUG=True](UnsafePointer(to=E), "circle_fit - E:")
 
+        # Jacobian of min_eigen() (numerically computed)
         var J2 = Matrix[Float64, 3, 6]()
         for a in range(6):
             let i : UInt32= nu[a][0].cast[UInt32]()
@@ -862,6 +1091,7 @@ fn Circle_fit[
         if is_defined["RFIT_DEBUG"]():
             Rfit.printIt[RFIT_DEBUG=True](UnsafePointer(to=J2), "circle_fit - J2:")
 
+        # joint cov matrix of (v0,v1,v2,c)
         var Cvc = Rfit.Matrix4d()
         {
             let t0 = (J2 @ E) @ J2.transpose()
@@ -888,13 +1118,16 @@ fn Circle_fit[
                 cm1 += v[i] * row_sum
                 cm3 += r0[i] * row_sum_r0
 
+            #      cm2 = (C0.cwiseProduct(t0)).sum();
             Cvc[3, 3] = cm1 + cm_sum + cm3
+            # (v.transpose() * C0 * v) + (C0.cwiseProduct(t0)).sum() + (r0.transpose() * t0 * r0);
         }
 
         @parameter
         if is_defined["RFIT_DEBUG"]():
             Rfit.printIt[RFIT_DEBUG=True](UnsafePointer(to=Cvc), "circle_fit - Cvc:")
 
+        # Jacobian (v0,v1,v2,c)->(X0,Y0,R)
         var J3 = Matrix[Float64, 3, 4]()
         {
             let t: Float64= 1.0 / h
@@ -916,6 +1149,7 @@ fn Circle_fit[
         if is_defined["RFIT_DEBUG"]():
             Rfit.printIt[RFIT_DEBUG=True](UnsafePointer(to=J3), "circle_fit - J3:")
 
+        # var(q)
         var Jq = Rfit.RowVector2Nd[N]()
         for i in range(2 * n):
             Jq[0, i] = mc[i] * s / Float64(n)
@@ -924,6 +1158,7 @@ fn Circle_fit[
         if is_defined["RFIT_DEBUG"]():
             Rfit.printIt[RFIT_DEBUG=True](UnsafePointer(to=Jq), "circle_fit - Jq:")
 
+        # cov(X0,Y0,R)
         var cov_uvr = (J3 @ Cvc) @ J3.transpose()
         let scale = Rfit.sqr(s_inv)
         for i in range(3):
@@ -952,6 +1187,21 @@ fn Circle_fit[
     return circle
 
 
+#/*!  \brief Perform an ordinary least square fit in the s-z plane to compute
+# * the parameters cotTheta and Zip.
+# *
+# * The fit is performed in the rotated S3D-Z' plane, following the formalism of
+# * Frodesen, Chapter 10, p. 259.
+# *
+# * The system has been rotated to both try to use the combined errors in s-z
+# * along Z', as errors in the Y direction and to avoid the patological case of
+# * degenerate lines with angular coefficient m = +/- inf.
+# *
+# * The rotation is using the information on the theta angle computed in the
+# * fast fit. The rotation is such that the S3D axis will be the X-direction,
+# * while the rotated Z-axis will be the Y-direction. This pretty much follows
+# * what is done in the same fit in the Broken Line approach.
+# */
 fn Line_fit[
     M3xN: AnyType,
     M6xN: AnyType,
@@ -970,12 +1220,20 @@ fn Line_fit[
     if theta < 0.0:
         theta += math.pi
 
+    # Prepare the Rotation Matrix to rotate the points
     var rot = Rfit.Matrix2d()
     rot[0, 0] = math.sin(theta)
     rot[0, 1] = math.cos(theta)
     rot[1, 0] = -math.cos(theta)
     rot[1, 1] = math.sin(theta)
 
+    # PROJECTION ON THE CILINDER
+    #
+    # p2D will be:
+    # [s1, s2, s3, ..., sn]
+    # [z1, z2, z3, ..., zn]
+    # s values will be ordinary x-values
+    # z values will be ordinary y-values
     var p2D = Rfit.Matrix2xNd[N].Zero()
     var Jx = Matrix[Float64, 2, 6]()
 
@@ -986,9 +1244,15 @@ fn Line_fit[
         Rfit.printIt[RFIT_DEBUG=True](UnsafePointer(to=hits_ge), "Line_fit covs: ")
         Rfit.printIt[RFIT_DEBUG=True](UnsafePointer(to=rot), "Line_fit rot: ")
 
+    # x & associated Jacobian
+    # cfr https://indico.cern.ch/event/663159/contributions/2707659/attachments/1517175/2368189/Riemann_fit.pdf
+    # Slide 11
+    # a ==> -o i.e. the origin of the circle in XY plane, negative
+    # b ==> p i.e. distances of the points wrt the origin of the circle.
     let ox = circle.par[0]
     let oy = circle.par[1]
 
+    # associated Jacobian, used in weights and errors computation
     var Cov = Rfit.Matrix6d.Zero()
     var cov_sz = InlineArray[Rfit.Matrix2d, N]()
 
@@ -1003,10 +1267,15 @@ fn Line_fit[
         o_neg[1] = -oy
         let cross :Float64 = Rfit.cross2D(o_neg, p)
         let dot : Float64 = o_neg[0] * p[0] + o_neg[1] * p[1]
+        # atan2(cross, dot) give back the angle in the transverse plane so tha the
+        # final equation reads: x_i = -q*R*theta (theta = angle returned by atan2)
         let atan2_ : float64= -Float64(circle.q) * math.atan2(cross, dot)
+        #    p2D.coeffRef(1, i) = atan2_ * circle.par(2);
         p2D[0, i] = atan2_ * circle.par[2]
 
+        # associated Jacobian, used in weights and errors- computation
         let temp0 :Float64 = -Float64(circle.q) * circle.par[2] * 1.0 / (Rfit.sqr(dot) + Rfit.sqr(cross))
+        # good approximation for big pt and eta
         var d_X0 : Float64= 0.0
         var d_Y0 : Float64= 0.0
         var d_R =: Float64 0.0
@@ -1034,19 +1303,26 @@ fn Line_fit[
             for c in range(3):
                 Cov[r, c] = circle.cov[r, c]
 
+        # x errors
         Cov[3, 3] = hits_ge[0, i]
+        # y errors
         Cov[4, 4] = hits_ge[2, i]
+        # z errors
         Cov[5, 5] = hits_ge[5, i]
+        # cov_xy
         Cov[3, 4] = hits_ge[1, i]
         Cov[4, 3] = hits_ge[1, i]
+        # cov_xz
         Cov[3, 5] = hits_ge[3, i]
         Cov[5, 3] = hits_ge[3, i]
+        # cov_yz
         Cov[4, 5] = hits_ge[4, i]
         Cov[5, 4] = hits_ge[4, i]
 
         let tmp : Matrix2d= (Jx @ Cov) @ Jx.transpose()
         cov_sz[i] = (rot @ tmp) @ rot.transpose()
 
+    # Math of d_{X0,Y0,R,x,y} all verified by hand
     for i in range(n):
         p2D[1, i] = hits[2, i]
 
@@ -1056,6 +1332,8 @@ fn Line_fit[
         s_arcs[i] = p2D[0, i]
         z_values[i] = p2D[1, i]
 
+    # The following matrix will contain errors orthogonal to the rotated S
+    # component only, with the Multiple Scattering properly treated!!
     var cov_with_ms = Rfit.MatrixNd[N]()
     Scatter_cov_line(
         cov_sz.unsafe_ptr().as_noalias_ptr(),
@@ -1072,6 +1350,7 @@ fn Line_fit[
         Rfit.printIt[RFIT_DEBUG=True](cov_sz.unsafe_ptr(), "line_fit - cov_sz:")
         Rfit.printIt[RFIT_DEBUG=True](UnsafePointer(to=cov_with_ms), "line_fit - cov_with_ms: ")
 
+    # Rotate Points with the shape [2, n]
     let p2D_rot : Rfit.Matrix2xNd[N]= rot @ p2D
 
     @parameter
@@ -1086,27 +1365,36 @@ fn Line_fit[
     for i in range(n):
         p2D_rot_row1[i] = p2D_rot[1, i]
 
+    # Build the A Matrix
     var A = Rfit.Matrix2xNd[N]()
     for i in range(n):
         A[0, i] = 1.0
+        # rotated s values
         A[1, i] = p2D_rot[0, i]
 
     @parameter
     if is_defined["RFIT_DEBUG"]():
         Rfit.printIt[RFIT_DEBUG=True](UnsafePointer(to=A), "A Matrix:")
 
+    # Build A^T V-1 A, where V-1 is the covariance of only the Y components.
     var Vy_inv = Rfit.MatrixNd[N]()
     choleskyInversion.invert(cov_with_ms, Vy_inv)
+    # MatrixNd<N> Vy_inv = cov_with_ms.inverse();
 
+    # Compute the Covariance Matrix of the fit parameters
     var Cov_params: Rfit.Matrix2d = (A @ Vy_inv) @ A.transpose()
     choleskyInversion.invert(Cov_params, Cov_params)
 
+    # Now Compute the Parameters in the form [2,1]
+    # The first component is q.
+    # The second component is m.
     var sol = (Cov_params @ A) @ (Vy_inv @ p2D_rot_row1)
 
     @parameter
     if is_defined["RFIT_DEBUG"]():
         Rfit.printIt[RFIT_DEBUG=True](UnsafePointer(to=sol), "Rotated solutions:")
 
+    # We need now to transfer back the results in the original s-z plane
     let common_factor = 1.0 / (math.sin(theta) - sol[1, 0] * math.cos(theta))
     var J = Rfit.Matrix2d()
     J[0, 0] = 0.0
@@ -1141,6 +1429,38 @@ fn Line_fit[
     return line
 
 
+#/*!
+#   \brief Helix fit by three step:
+#   -fast pre-fit (see Fast_fit() for further info); \n
+#   -circle fit of hits projected in the transverse plane by Riemann-Chernov
+#       algorithm (see Circle_fit() for further info); \n
+#   -line fit of hits projected on cylinder surface by orthogonal distance
+#       regression (see Line_fit for further info). \n
+#   Points must be passed ordered (from inner to outer layer).
+#   \param hits Matrix3xNd hits coordinates in this form: \n
+#       |x0|x1|x2|...|xn| \n
+#       |y0|y1|y2|...|yn| \n
+#       |z0|z1|z2|...|zn|
+#   \param hits_cov Matrix3Nd covariance matrix in this form (()->cov()): \n
+#  |(x0,x0)|(x1,x0)|(x2,x0)|.|(y0,x0)|(y1,x0)|(y2,x0)|.|(z0,x0)|(z1,x0)|(z2,x0)| \n
+#  |(x0,x1)|(x1,x1)|(x2,x1)|.|(y0,x1)|(y1,x1)|(y2,x1)|.|(z0,x1)|(z1,x1)|(z2,x1)| \n
+#  |(x0,x2)|(x1,x2)|(x2,x2)|.|(y0,x2)|(y1,x2)|(y2,x2)|.|(z0,x2)|(z1,x2)|(z2,x2)| \n
+#      .       .       .    .    .       .       .    .    .       .       .     \n
+#  |(x0,y0)|(x1,y0)|(x2,y0)|.|(y0,y0)|(y1,y0)|(y2,x0)|.|(z0,y0)|(z1,y0)|(z2,y0)| \n
+#  |(x0,y1)|(x1,y1)|(x2,y1)|.|(y0,y1)|(y1,y1)|(y2,x1)|.|(z0,y1)|(z1,y1)|(z2,y1)| \n
+#  |(x0,y2)|(x1,y2)|(x2,y2)|.|(y0,y2)|(y1,y2)|(y2,x2)|.|(z0,y2)|(z1,y2)|(z2,y2)| \n
+#      .       .       .    .    .       .       .    .    .       .       .     \n
+#  |(x0,z0)|(x1,z0)|(x2,z0)|.|(y0,z0)|(y1,z0)|(y2,z0)|.|(z0,z0)|(z1,z0)|(z2,z0)| \n
+#  |(x0,z1)|(x1,z1)|(x2,z1)|.|(y0,z1)|(y1,z1)|(y2,z1)|.|(z0,z1)|(z1,z1)|(z2,z1)| \n
+#  |(x0,z2)|(x1,z2)|(x2,z2)|.|(y0,z2)|(y1,z2)|(y2,z2)|.|(z0,z2)|(z1,z2)|(z2,z2)|
+#  \param B magnetic field in the center of the detector in Gev/cm/c
+#  unit, in order to perform pt calculation.
+#  \param error flag for error computation.
+#  \param scattering flag for multiple scattering treatment.
+#  (see Circle_fit() documentation for further info).
+#  \warning see Circle_fit(), Line_fit() and Fast_fit() warnings.
+#  \bug see Circle_fit(), Line_fit() and Fast_fit() bugs.
+# */
 fn Helix_fit[
     N: Int,
 ](
@@ -1154,6 +1474,7 @@ fn Helix_fit[
     for i in range(n):
         rad[i] = math.sqrt(hits[0, i] * hits[0, i] + hits[1, i] * hits[1, i])
 
+    # Fast_fit gives back (X0, Y0, R, theta) w/o errors, using only 3 points.
     var fast_fit = Rfit.Vector4d()
     Fast_fit(hits, fast_fit)
 
