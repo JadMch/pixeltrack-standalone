@@ -186,7 +186,7 @@ fn cov_radtocart[
     if is_defined["RFIT_DEBUG"]():
         print("Address of p2D: ", UnsafePointer(to=p2D))
 
-    let n: Int = N
+    comptime n: Int = N
     var cov_cart = Rfit.Matrix2Nd[N].Zero()
     var rad_inv = Rfit.VectorNd[N]()
     for i in range(n):
@@ -771,7 +771,7 @@ fn Circle_fit[
         if is_defined["RFIT_DEBUG"]():
             Rfit.printIt[RFIT_DEBUG=True](UnsafePointer(to=D_[0][0]), "circle_fit - D_[0][0]:")
 
-        let nu = InlineArray[InlineArray[UInt32, 2], 6](
+        comptime nu = InlineArray[InlineArray[UInt32, 2], 6](
             InlineArray[UInt32, 2](0, 0),
             InlineArray[UInt32, 2](0, 1),
             InlineArray[UInt32, 2](0, 2),
@@ -844,67 +844,73 @@ fn Circle_fit[
 
         var J2 = Matrix[Float64, 3, 6]()
         for a in range(6):
-            let i = nu[a][0].cast[Int]()
-            let j = nu[a][1].cast[Int]()
+            let i : UInt32= nu[a][0].cast[UInt32]()
+            let j : UInt32= nu[a][1].cast[UInt32]()
             var Delta = Rfit.Matrix3d.Zero()
             let delta_val = abs(A[i, j] * Rfit.d)
             Delta[i, j] = delta_val
             Delta[j, i] = delta_val
 
-            var v_tmp = min_eigen3D_fast(A + Delta)
-            let sign = 1.0 if v_tmp[2] > 0.0 else -1.0
+            var J2_col = min_eigen3D_fast(A + Delta)
+            let sign = 1.0 if J2_col[2] > 0.0 else -1.0
             for r in range(3):
-                J2[r, a] = (v_tmp[r] * sign - v[r]) / delta_val
+                J2_col[r] = (J2_col[r] * sign - v[r]) / delta_val
+            for r in range(3):
+                J2[r, a] = J2_col[r]
 
         @parameter
         if is_defined["RFIT_DEBUG"]():
             Rfit.printIt[RFIT_DEBUG=True](UnsafePointer(to=J2), "circle_fit - J2:")
 
         var Cvc = Rfit.Matrix4d()
-        let t0 = (J2 @ E) @ J2.transpose()
-        var t1 = Rfit.Vector3d()
-        for r in range(3):
-            t1[r] = -(t0[r, 0] * r0[0] + t0[r, 1] * r0[1] + t0[r, 2] * r0[2])
+        {
+            let t0 = (J2 @ E) @ J2.transpose()
+            var t1 = Rfit.Vector3d()
+            for r in range(3):
+                t1[r] = -(t0[r, 0] * r0[0] + t0[r, 1] * r0[1] + t0[r, 2] * r0[2])
 
-        for r in range(3):
-            for c in range(3):
-                Cvc[r, c] = t0[r, c]
-            Cvc[r, 3] = t1[r]
-            Cvc[3, r] = t1[r]
+            for r in range(3):
+                for c in range(3):
+                    Cvc[r, c] = t0[r, c]
+                Cvc[r, 3] = t1[r]
+                Cvc[3, r] = t1[r]
 
-        var cm1: Float64 = 0.0
-        var cm3: Float64 = 0.0
-        var cm_sum: Float64 = 0.0
-        for i in range(3):
-            var row_sum: Float64 = 0.0
-            var row_sum_r0: Float64 = 0.0
-            for j in range(3):
-                row_sum += C0[i, j] * v[j]
-                cm_sum += C0[i, j] * t0[i, j]
-                row_sum_r0 += t0[i, j] * r0[j]
-            cm1 += v[i] * row_sum
-            cm3 += r0[i] * row_sum_r0
+            var cm1: Float64 = 0.0
+            var cm3: Float64 = 0.0
+            var cm_sum: Float64 = 0.0
+            for i in range(3):
+                var row_sum: Float64 = 0.0
+                var row_sum_r0: Float64 = 0.0
+                for j in range(3):
+                    row_sum += C0[i, j] * v[j]
+                    cm_sum += C0[i, j] * t0[i, j]
+                    row_sum_r0 += t0[i, j] * r0[j]
+                cm1 += v[i] * row_sum
+                cm3 += r0[i] * row_sum_r0
 
-        Cvc[3, 3] = cm1 + cm_sum + cm3
+            Cvc[3, 3] = cm1 + cm_sum + cm3
+        }
 
         @parameter
         if is_defined["RFIT_DEBUG"]():
             Rfit.printIt[RFIT_DEBUG=True](UnsafePointer(to=Cvc), "circle_fit - Cvc:")
 
         var J3 = Matrix[Float64, 3, 4]()
-        let t = 1.0 / h
-        J3[0, 0] = -v2x2_inv
-        J3[0, 1] = 0.0
-        J3[0, 2] = v[0] * Rfit.sqr(v2x2_inv) * 2.0
-        J3[0, 3] = 0.0
-        J3[1, 0] = 0.0
-        J3[1, 1] = -v2x2_inv
-        J3[1, 2] = v[1] * Rfit.sqr(v2x2_inv) * 2.0
-        J3[1, 3] = 0.0
-        J3[2, 0] = v[0] * v2x2_inv * t
-        J3[2, 1] = v[1] * v2x2_inv * t
-        J3[2, 2] = -h * Rfit.sqr(v2x2_inv) * 2.0 - (2.0 * c + v[2]) * v2x2_inv * t
-        J3[2, 3] = -t
+        {
+            let t: Float64= 1.0 / h
+            J3[0, 0] = -v2x2_inv
+            J3[0, 1] = 0.0
+            J3[0, 2] = v[0] * Rfit.sqr(v2x2_inv) * 2.0
+            J3[0, 3] = 0.0
+            J3[1, 0] = 0.0
+            J3[1, 1] = -v2x2_inv
+            J3[1, 2] = v[1] * Rfit.sqr(v2x2_inv) * 2.0
+            J3[1, 3] = 0.0
+            J3[2, 0] = v[0] * v2x2_inv * t
+            J3[2, 1] = v[1] * v2x2_inv * t
+            J3[2, 2] = -h * Rfit.sqr(v2x2_inv) * 2.0 - (2.0 * c + v[2]) * v2x2_inv * t
+            J3[2, 3] = -t
+        }
 
         @parameter
         if is_defined["RFIT_DEBUG"]():
@@ -924,12 +930,13 @@ fn Circle_fit[
             for j in range(3):
                 cov_uvr[i, j] *= scale
 
+
+        # Maybe optimise if V is a covariance matrix 
         var scalar: Float64 = 0.0
         for i in range(2 * n):
-            var row_sum: Float64 = 0.0
             for j in range(2 * n):
-                row_sum += V[i, j] * Jq[0, j]
-            scalar += Jq[0, i] * row_sum
+                scalar += Jq[0, i] * V[i, j] * Jq[0, j]
+
 
         for i in range(3):
             for j in range(3):
@@ -949,7 +956,6 @@ fn Line_fit[
     M3xN: AnyType,
     M6xN: AnyType,
     V4: AnyType,
-    N: Int,
 ](
     hits: M3xN,
     hits_ge: M6xN,
@@ -958,7 +964,8 @@ fn Line_fit[
     B: Float64,
     error: Bool,
 ) -> Rfit.line_fit:
-    let n: Int = N
+    comptime N: Int = M3xN.ColsAtCompileTime()
+    comptime n: Int = N
     var theta = -Float64(circle.q) * math.atan(fast_fit[3])
     if theta < 0.0:
         theta += math.pi
@@ -994,21 +1001,21 @@ fn Line_fit[
         var o_neg = Rfit.Vector2d()
         o_neg[0] = -ox
         o_neg[1] = -oy
-        let cross = Rfit.cross2D(o_neg, p)
-        let dot = o_neg[0] * p[0] + o_neg[1] * p[1]
-        let atan2_ = -Float64(circle.q) * math.atan2(cross, dot)
+        let cross :Float64 = Rfit.cross2D(o_neg, p)
+        let dot : Float64 = o_neg[0] * p[0] + o_neg[1] * p[1]
+        let atan2_ : float64= -Float64(circle.q) * math.atan2(cross, dot)
         p2D[0, i] = atan2_ * circle.par[2]
 
-        let temp0 = -Float64(circle.q) * circle.par[2] * 1.0 / (Rfit.sqr(dot) + Rfit.sqr(cross))
-        var d_X0 = 0.0
-        var d_Y0 = 0.0
-        var d_R = 0.0
+        let temp0 :Float64 = -Float64(circle.q) * circle.par[2] * 1.0 / (Rfit.sqr(dot) + Rfit.sqr(cross))
+        var d_X0 : Float64= 0.0
+        var d_Y0 : Float64= 0.0
+        var d_R =: Float64 0.0
         if error:
             d_X0 = -temp0 * ((py + oy) * dot - (px - ox) * cross)
             d_Y0 = temp0 * ((px + ox) * dot - (oy - py) * cross)
             d_R = atan2_
-        let d_x = temp0 * (oy * dot + ox * cross)
-        let d_y = temp0 * (-ox * dot + oy * cross)
+        let d_x : Float64 = temp0 * (oy * dot + ox * cross)
+        let d_y : Float64 = temp0 * (-ox * dot + oy * cross)
 
         Jx[0, 0] = d_X0
         Jx[0, 1] = d_Y0
@@ -1037,7 +1044,7 @@ fn Line_fit[
         Cov[4, 5] = hits_ge[4, i]
         Cov[5, 4] = hits_ge[4, i]
 
-        let tmp = (Jx @ Cov) @ Jx.transpose()
+        let tmp : Matrix2d= (Jx @ Cov) @ Jx.transpose()
         cov_sz[i] = (rot @ tmp) @ rot.transpose()
 
     for i in range(n):
@@ -1051,7 +1058,7 @@ fn Line_fit[
 
     var cov_with_ms = Rfit.MatrixNd[N]()
     Scatter_cov_line(
-        cov_sz.unsafe_ptr(),
+        cov_sz.unsafe_ptr().as_noalias_ptr(),
         fast_fit,
         s_arcs,
         z_values,
@@ -1065,7 +1072,7 @@ fn Line_fit[
         Rfit.printIt[RFIT_DEBUG=True](cov_sz.unsafe_ptr(), "line_fit - cov_sz:")
         Rfit.printIt[RFIT_DEBUG=True](UnsafePointer(to=cov_with_ms), "line_fit - cov_with_ms: ")
 
-    let p2D_rot = rot @ p2D
+    let p2D_rot : Rfit.Matrix2xNd[N]= rot @ p2D
 
     @parameter
     if is_defined["RFIT_DEBUG"]():
@@ -1091,7 +1098,7 @@ fn Line_fit[
     var Vy_inv = Rfit.MatrixNd[N]()
     choleskyInversion.invert(cov_with_ms, Vy_inv)
 
-    var Cov_params = (A @ Vy_inv) @ A.transpose()
+    var Cov_params: Rfit.Matrix2d = (A @ Vy_inv) @ A.transpose()
     choleskyInversion.invert(Cov_params, Cov_params)
 
     var sol = (Cov_params @ A) @ (Vy_inv @ p2D_rot_row1)
@@ -1150,7 +1157,7 @@ fn Helix_fit[
     var fast_fit = Rfit.Vector4d()
     Fast_fit(hits, fast_fit)
 
-    var hits_cov = Rfit.Matrix2Nd[N].Zero()
+    var hits_cov: Rfit.Matrix2Nd[N] = Rfit.MatrixXd.Zero(2 * n, 2 * n)
     Rfit.loadCovariance2D(hits_ge, hits_cov)
 
     var hits2D = Rfit.Matrix2xNd[N]()
