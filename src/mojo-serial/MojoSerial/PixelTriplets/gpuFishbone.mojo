@@ -43,7 +43,7 @@ trait gpuPixelDoublets:
             let xo = c0.get_outer_x(hh)
             let yo = c0.get_outer_y(hh)
             let zo = c0.get_outer_z(hh)
-            let sg = 0
+            var sg = 0
             for ic in range(s):
                 ref ci = cells[vc[ic]]
                 if 0 == ci.theUsed:
@@ -51,11 +51,12 @@ trait gpuPixelDoublets:
                 if checkTrack and ci.tracks().empty():
                     continue
                 cc[sg] = vc[ic]
-                d[sg] = ci.get_inner_detIndex
+                d[sg] = ci.get_inner_detIndex(hh)
 
                 x[sg] = ci.get_inner_x(hh) - xo
                 y[sg] = ci.get_inner_y(hh) - yo
-                z[sg] = x[sg] * x[sg] + y[sg] * y[sg] + z[sg] * z[sg]
+                z[sg] = ci.get_inner_z(hh) - zo
+                n[sg] = x[sg] * x[sg] + y[sg] * y[sg] + z[sg] * z[sg]
                 sg += 1
         
         if sg < 2 :
