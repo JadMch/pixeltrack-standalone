@@ -1,9 +1,12 @@
 
 import CAConstants
+from MojoSerial.CUDACore.AtomicPairCounter import AtomicPairCounter
+from MojoSerial.CUDACore.CUDACompat import CUDAStreamType
+from MojoSerial.CUDACore.HistoContainer import launchZero
+
 alias HitToTuple = CAConstants.HitToTuple
 alias TupleMultiplicity = CAConstants.TupleMultiplicity
-use hip.stream.Stream
-use cms.cuda.{AtomicPairCounter, launchZero}
+alias Stream = CUDAStreamType
 
 impl CAHitNtupletGeneratorKernels[CPUTraits]:
     fn allocate_on_gpu(self, stream: Stream):
