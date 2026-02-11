@@ -1,6 +1,7 @@
 # Translated from pixeltrack-standalone/src/serial/plugin-PixelTriplets/BrokenLine.h
 
 import math
+from MojoSerial.MojoBridge.Matrix import Matrix
 from FitUtils import Rfit
 import choleskyInversion
 
@@ -546,7 +547,11 @@ fn BL_Line_fit[V4: AnyType, M6xN: AnyType, N: Int](
 #\bug see BL_Circle_fit(), BL_Line_fit() and Fast_fit() bugs.
 # 
 #\return (phi,Tip,p_t,cot(theta)),Zip), their covariance matrix and the chi2's of the circle and line fits.
-fn BL_Helix_fit[N: Int](hits: Rfit.Matrix3xNd[N], hits_ge: Eigen.Matrix[Float32, 6, 4], B: Float64) -> Rfit.helix_fit:
+fn BL_Helix_fit[N: Int](
+    hits: Rfit.Matrix3xNd[N],
+    hits_ge: Matrix[Float32, 6, 4],
+    B: Float64,
+) -> Rfit.helix_fit:
     var helix = Rfit.helix_fit()
     var fast_fit = Rfit.Vector4d()
     BL_Fast_fit(hits, fast_fit)

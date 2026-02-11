@@ -1,32 +1,35 @@
 
-use cudacore.cuda_compat
-use cudacore.simple_vector
-use cuda_data_formats.pixel_track_heterogeneous
-use cuda_data_formats.tracking_rec_hit_2d_cuda
-use ca_hit_ntuplet_generator_kernels
-use gpu_ca_cell
-use helix_fit_on_gpu
-
-
-
-use ProductRegistry
+from CAHitNtupletGeneratorKernels import (
+    Counters as KernelCounters,
+    Params as KernelParams,
+    QualityCuts as KernelQualityCuts,
+)
+from MojoSerial.CUDADataFormats.PixelTrackHeterogeneous import (
+    PixelTrack as pixelTrack,
+    PixelTrackHeterogeneous,
+)
+from MojoSerial.CUDADataFormats.TrackingRecHit2DHeterogeneous import (
+    TrackingRecHit2DCPU,
+)
+from MojoSerial.Framework.ProductRegistry import ProductRegistry
 
 
 
 trait CAHitNtupletGeneratorOnGPU:
-    # Type aliases
-    alias Quality = pixel_track.Quality
-    alias OutputSoA = pixel_track.TrackSoA
-    alias HitContainer = pixel_track.HitContainer
+
+    alias Quality = pixelTrack.Quality
+    alias OutputSoA = pixelTrack.TrackSoA
+    alias HitContainer = pixelTrack.HitContainer
     alias Tuple = HitContainer
 
-    alias QualityCuts = ca_hit_ntuplet_generator.QualityCuts
-    alias Params = ca_hit_ntuplet_generator.Params
-    alias Counters = ca_hit_ntuplet_generator.Counters
+    alias QualityCuts = KernelQualityCuts
+    alias Params = KernelParams
+    alias Counters = KernelCounters
 
 
     fn make_tuples(
         self,
-        hits_d: tracking_rec_hit_2d_cuda.TrackingRecHit2DCPU,
+        hits_d: TrackingRecHit2DCPU,
         bfield: Float32
-    ) -> pixel_track.PixelTrackHeterogeneous
+    ) -> PixelTrackHeterogeneous:
+        pass
