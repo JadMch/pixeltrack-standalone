@@ -1,20 +1,23 @@
-use cuda_data_formats.tracking_rec_hit_2d_cuda.TrackingRecHit2DSOAView
 import CAConstants
+from GPUCACell import GPUCACell
+from MojoSerial.CUDACore.AtomicPairCounter import AtomicPairCounter
+from MojoSerial.CUDACore.CUDACompat import CUDAStreamType
+from MojoSerial.CUDADataFormats.PixelTrackHeterogeneous import (
+    PixelTrack as pixelTrack,
+)
+from MojoSerial.CUDADataFormats.TrackingRecHit2DHeterogeneous import (
+    TrackingRecHit2DHeterogeneous,
+)
+from MojoSerial.CUDADataFormats.TrackingRecHit2DSOAView import (
+    TrackingRecHit2DSOAView,
+)
+
 alias HitToTuple = CAConstants.HitToTuple
 alias TupleMultiplicity = CAConstants.TupleMultiplicity
-use pixel_track.Quality
-use pixel_track.TrackSoA
-use pixel_track.HitContainer
-
-alias HitsView = TrackingRecHit2DSOAView
-alias HitsOnGPU = TrackingRecHit2DSOAView
-
-alias HitToTuple = HitToTuple
-alias TupleMultiplicity = TupleMultiplicity
-
-alias Quality = Quality
-alias TkSoA = TrackSoA
-alias HitContainer = HitContainer
+alias Quality = pixelTrack.Quality
+alias TkSoA = pixelTrack.TrackSoA
+alias HitContainer = pixelTrack.HitContainer
+alias Stream = CUDAStreamType
 
 struct Counters:
     var nEvents: UInt64
@@ -120,13 +123,6 @@ struct Params:
         self.dcaCutOuterTriplet = dcaCutOuterTriplet
         self.cuts = cuts
 
-use cuda_data_formats.tracking_rec_hit_2d_cuda.TrackingRecHit2DSOAView
-use cuda_data_formats.tracking_rec_hit_2d_heterogeneous.TrackingRecHit2DHeterogeneous
-use pixel_track.{Quality, TrackSoA, HitContainer}
-use gpu_ca_cell.{GPUCACell}
-use atomic_pair_counter.AtomicPairCounter
-use hip.stream.Stream
-
 trait MemoryTraits:
     fn unique_ptr[T]() -> T*
 
@@ -184,7 +180,7 @@ trait CAHitNtupletGeneratorKernels[T: MemoryTraits]:
         self,
         hh: HitsOnCPU,
         tuples_d: TrackSoA*,
-        cuda_stream: Stream
+        cudaSream: Stream
     ) raises:
         pass
 
@@ -192,7 +188,7 @@ trait CAHitNtupletGeneratorKernels[T: MemoryTraits]:
         self,
         hh: HitsOnCPU,
         tuples_d: TrackSoA*,
-        cuda_stream: Stream
+        cudaSream: Stream
     ) raises:
         pass
 
@@ -200,7 +196,7 @@ trait CAHitNtupletGeneratorKernels[T: MemoryTraits]:
         self,
         hv: HitsView*,
         tuples_d: TrackSoA*,
-        cuda_stream: Stream
+        cudaSream: Stream
     ) raises:
         pass
 
@@ -214,12 +210,12 @@ trait CAHitNtupletGeneratorKernels[T: MemoryTraits]:
     fn allocate_on_gpu(self, stream: Stream) raises:
         pass
 
-    fn cleanup(self, cuda_stream: Stream) raises:
+    fn cleanup(self, cudaSream: Stream) raises:
         pass
 
     @staticmethod
     fn print_counters(counters: Counters*):
         pass
 
-let CAHitNtupletGeneratorKernelsCPU: Type = CAHitNtupletGeneratorKernels[CPUTraits]
-let CAHitNtupletGeneratorKernelsGPU: Type = CAHitNtupletGeneratorKernels[GPUTraits]
+comptime CAHitNtupletGeneratorKernelsCPU= CAHitNtupletGeneratorKernels[CPUTraits]
+comptime CAHitNtupletGeneratorKernelsGPU= CAHitNtupletGeneratorKernels[GPUTraits]
