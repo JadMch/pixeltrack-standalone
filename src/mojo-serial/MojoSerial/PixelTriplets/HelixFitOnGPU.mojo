@@ -2,7 +2,10 @@ from CUDADataFormats import PixelTrackHeterogeneous
 from CUDADataFormats import TrackingRecHit2DCUDA
 import CAConstants
 import FitResults
+from MojoSerial.CUDACore.CUDACompat import CUDAStreamType
 from MojoSerial.MojoBridge.Matrix import Matrix, Map
+
+alias cudaStream_t = CUDAStreamType
 
 struct Rfit:
     # in case of memory issue can be made smaller
