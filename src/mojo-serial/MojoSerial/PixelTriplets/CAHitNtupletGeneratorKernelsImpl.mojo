@@ -51,11 +51,26 @@ fn Kernel_checkOverflows(
     
     ref c = counters[]
     if first == 0 :
-        Atomic.fetch_add[ordering = Consistency.SEQUENTIAL](UnsafePointer(to=c.nEvents), 1)  
-        Atomic.fetch_add[ordering = Consistency.SEQUENTIAL](UnsafePointer(to=c.nHits),nHits)
-        Atomic.fetch_add[ordering = Consistency.SEQUENTIAL](UnsafePointer(to=c.nCells),UnsafePointer[c.nCells] )
-        Atomic.fetch_add[ordering = Consistency.SEQUENTIAL](UnsafePointer(to=c.nTuples),apc[].get().m )
-        Atomic.fetch_add[ordering = Consistency.SEQUENTIAL](UnsafePointer(to=c.nFitTracks),tupleMultiplicity[].size())
+        Atomic.fetch_add[ordering = Consistency.SEQUENTIAL](
+            UnsafePointer(to=c.nEvents),
+            UInt64(1),
+        )
+        Atomic.fetch_add[ordering = Consistency.SEQUENTIAL](
+            UnsafePointer(to=c.nHits),
+            nHits.cast[UInt64](),
+        )
+        Atomic.fetch_add[ordering = Consistency.SEQUENTIAL](
+            UnsafePointer(to=c.nCells),
+            nCells[].cast[UInt64](),
+        )
+        Atomic.fetch_add[ordering = Consistency.SEQUENTIAL](
+            UnsafePointer(to=c.nTuples),
+            apc[].get()[1].cast[UInt64](),
+        )
+        Atomic.fetch_add[ordering = Consistency.SEQUENTIAL](
+            UnsafePointer(to=c.nFitTracks),
+            tupleMultiplicity[].size().cast[UInt64](),
+        )
 
     @parameter
     if is_defined["NTUPLE_DEBUG"]():
@@ -113,11 +128,20 @@ fn Kernel_checkOverflows(
         if (thisCell.tracks().full()) : #++tooManyTracks[thisCell.theLayerPairId]
           print("Tracks overflow " , idx , " in \n", thisCell.theLayerPairId)
         if (thisCell.theDoubletId < 0):
-          Atomic.fetch_add[ordering = Consistency.SEQUENTIAL](UnsafePointer(to=c.nKilledCells), 1)
+          Atomic.fetch_add[ordering = Consistency.SEQUENTIAL](
+              UnsafePointer(to=c.nKilledCells),
+              UInt64(1),
+          )
         if (0 == thisCell.theUsed):
-          Atomic.fetch_add[ordering = Consistency.SEQUENTIAL](UnsafePointer(to=c.nEmptyCells), 1)
+          Atomic.fetch_add[ordering = Consistency.SEQUENTIAL](
+              UnsafePointer(to=c.nEmptyCells),
+              UInt64(1),
+          )
         if (thisCell.tracks().empty()):
-          Atomic.fetch_add[ordering = Consistency.SEQUENTIAL](UnsafePointer(to=c.nZeroTrackCells), 1)
+          Atomic.fetch_add[ordering = Consistency.SEQUENTIAL](
+              UnsafePointer(to=c.nZeroTrackCells),
+              UInt64(1),
+          )
         idx+=1
         
   
@@ -469,7 +493,10 @@ fn kernel_doStatsForTracks(tuples  : UnsafePointer[HitContainer] ,
             break # guard
         if quality[idx] != trackQuality.loose:
             continue
-        Atomic.fetch_add[ordering = Consistency.SEQUENTIAL](UnsafePointer(to=(counters[].nGoodTracks)) , 1)
+        Atomic.fetch_add[ordering = Consistency.SEQUENTIAL](
+            UnsafePointer(to=(counters[].nGoodTracks)),
+            UInt64(1),
+        )
 
 
 fn kernel_countHitInTracks(tuples  : UnsafePointer[HitContainer] , 
@@ -530,9 +557,15 @@ fn kernel_doStatsForHitInTracks(hitToTuple: UnsafePointer[CAHitNtupletGeneratorK
         let idx_u = idx.cast[UInt32]()
         if hitToTuple[].size(idx_u) == 0:
             continue # SHALL NOT BE break
-        Atomic.fetch_add[ordering = Consistency.SEQUENTIAL](UnsafePointer(to=c.nUsedHits) , 1)
+        Atomic.fetch_add[ordering = Consistency.SEQUENTIAL](
+            UnsafePointer(to=c.nUsedHits),
+            UInt64(1),
+        )
         if hitToTuple[].size(idx) > 1 :
-            Atomic.fetch_add[ordering = Consistency.SEQUENTIAL](UnsafePointer(to=c.nDupHits) , 1)
+            Atomic.fetch_add[ordering = Consistency.SEQUENTIAL](
+                UnsafePointer(to=c.nDupHits),
+                UInt64(1),
+            )
 
 fn kernel_tripletCleaner(hhp : UnsafePointer[TrackingRecHit2DSOAView] , ptuples : UnsafePointer[HitContainer] , ptracks : UnsafePointer[TkSoA] , quality : UnsafePointer[Quality] , phitToTuple : UnsafePointer[CAHitNtupletGeneratorKernelsCPU.HitToTuple]):
     let bad  = trackQuality.bad
