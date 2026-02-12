@@ -11,8 +11,9 @@ from MojoSerial.CUDADataFormats.PixelTrackHeterogeneous import (
 from MojoSerial.CUDADataFormats.TrackingRecHit2DHeterogeneous import (
     TrackingRecHit2DCPU,
 )
+from MojoSerial.Framework.Event import Event
+from MojoSerial.Framework.EventSetup import EventSetup
 from MojoSerial.Framework.ProductRegistry import ProductRegistry
-
 
 
 trait CAHitNtupletGeneratorOnGPU:
@@ -26,6 +27,8 @@ trait CAHitNtupletGeneratorOnGPU:
     alias Params = KernelParams
     alias Counters = KernelCounters
 
+    var m_params: Params
+    var m_counters: UnsafePointer[Counters] = UnsafePointer[Counters]()
 
     fn make_tuples(
         self,
