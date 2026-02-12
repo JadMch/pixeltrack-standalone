@@ -9,7 +9,7 @@
 import math
 
 import CAConstants
-import cms
+from MojoSerial.CUDACore.AtomicPairCounter import AtomicPairCounter
 from os.atomic import Atomic, Consistency
 from memory.unsafe_pointer import UnsafePointer
 import gpuPixelDoublets
@@ -35,7 +35,7 @@ alias HitContainer = pixelTrack.HitContainer
 fn Kernel_checkOverflows(
     foundNtuplets: UnsafePointer[HitContainer],
     tupleMultiplicity: UnsafePointer[TupleMultiplicity],
-    apc: UnsafePointer[cms.cuda.AtomicPairCounter],
+    apc: UnsafePointer[AtomicPairCounter],
     cells: UnsafePointer[GPUCACell],  # __restrict__ dropped
     nCells: UnsafePointer[UInt32],    # uint32_t const*
     cellNeighbors: UnsafePointer[gpuPixelDoublets.CellNeighborsVector],
@@ -212,8 +212,8 @@ fn kernel_fastDuplicateRemover(
                 
 
 fn kernel_connect(
-            apc1: UnsafePointer[cms.cuda.AtomicPairCounter],
-            apc2: UnsafePointer[cms.cuda.AtomicPairCounter],  # just to zero them
+            apc1: UnsafePointer[AtomicPairCounter],
+            apc2: UnsafePointer[AtomicPairCounter],  # just to zero them
             hhp: UnsafePointer[GPUCACell.Hits],              
             cells: UnsafePointer[GPUCACell],
             nCells: UnsafePointer[UInt32],
@@ -293,7 +293,7 @@ fn kernel_find_ntuplets(
     nCells : UnsafePointer[UInt32],
     cellTracks : UnsafePointer[gpuPixelDoublets.CellTracksVector],
     foundNtuplets : UnsafePointer[HitContainer],
-    apc : UnsafePointer[cms.cuda.AtomicPairCounter],
+    apc : UnsafePointer[AtomicPairCounter],
     quality : UnsafePointer[Quality],
     minHitsPerNtuplet : UInt32
     ):
