@@ -1357,3 +1357,111 @@ struct Matrix[T: DType, rows: Int, colns: Int](
         for i in range(rows):
             res[i] = Vector[T, colns](pop_count(self._data[i]._data))
         return Self(res)
+
+
+@fieldwise_init
+struct Map[T: DType, rows: Int, colns: Int, default_inner_stride: Int = 1](
+    Copyable,
+    Defaultable,
+    Movable,
+    Typeable,
+):
+    var data: UnsafePointer[Scalar[T]]
+    var inner_stride: Int
+    var outer_stride: Int
+
+    @always_inline
+    fn __init__(out self, ptr: UnsafePointer[Scalar[T]]):
+        self.data = ptr
+        self.inner_stride = default_inner_stride
+        self.outer_stride = rows * default_inner_stride
+
+    @always_inline
+    fn __init__(out self, ptr: UnsafePointer[Scalar[T]], inner_stride: Int):
+        self.data = ptr
+        self.inner_stride = inner_stride
+        self.outer_stride = rows * inner_stride
+
+    @always_inline
+    fn __init__(
+        out self,
+        ptr: UnsafePointer[Scalar[T]],
+        inner_stride: Int,
+        outer_stride: Int,
+    ):
+        self.data = ptr
+        self.inner_stride = inner_stride
+        self.outer_stride = outer_stride
+
+    @always_inline
+    fn __getitem__(self, r: Int, c: Int) -> Scalar[T]:
+        return (
+            self.data + c * self.outer_stride + r * self.inner_stride
+        )[]
+
+    @always_inline
+    fn __setitem__(mut self, r: Int, c: Int, val: Scalar[T]):
+        (self.data + c * self.outer_stride + r * self.inner_stride)[] = val
+    #this is not flattening it is just taking first col
+    @always_inline
+    fn __getitem__(self, i: Int) -> Scalar[T]:
+        constrained[colns == 1, "Map 1D access requires a column vector"]()
+        return self[i, 0]
+
+    @always_inline
+    fn __setitem__(mut self, i: Int, val: Scalar[T]):
+        constrained[colns == 1, "Map 1D access requires a column vector"]()
+        self[i, 0] = val
+
+    @always_inline
+    fn col(self, c: Int) -> Vector[T, rows]:
+        var res = Vector[T, rows]()
+        for r in range(rows):
+            res[r] = self[r, c]
+        return res
+
+    @always_inline
+    fn block(
+        self,
+        row: Int,
+        col: Int,
+        br: IntLiteral,
+        bc: IntLiteral,
+    ) -> Matrix[T, br, bc]:
+        var res = Matrix[T, br, bc]()
+        for r in range(br):
+            for c in range(bc):
+                res[r, c] = self[row + r, col + c]
+        return res
+        
+    #this is not flattening it is just taking first col
+    @always_inline
+    fn head(self, n: IntLiteral) -> Matrix[T, n, 1]:
+        constrained[colns == 1, "Map head() requires a column vector"]()
+        var res = Matrix[T, n, 1]()
+        for i in range(n):
+            res[i, 0] = self[i, 0]
+        return res
+
+    @staticmethod
+    @parameter
+    fn RowsAtCompileTime() -> Int:
+        return rows
+
+    @staticmethod
+    @parameter
+    fn ColsAtCompileTime() -> Int:
+        return colns
+
+    @always_inline
+    @staticmethod
+    fn dtype() -> String:
+        return (
+            "Map["
+            + T.__repr__()
+            + ", "
+            + String(rows)
+            + ", "
+            + String(colns)
+            + "]"
+        )
