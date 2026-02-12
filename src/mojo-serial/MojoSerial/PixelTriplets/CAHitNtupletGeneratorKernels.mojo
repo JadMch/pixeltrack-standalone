@@ -130,10 +130,11 @@ trait MemoryTraits:
 # --- Main Struct (GPU Kernel Driver) ---
 trait CAHitNtupletGeneratorKernels[T: MemoryTraits]:
 
-    # Type aliases (mirroring C++ usings)
+    # Type aliases
     alias HitsView = TrackingRecHit2DSOAView
     alias HitsOnGPU = TrackingRecHit2DSOAView
-    alias HitsOnCPU = TrackingRecHit2DHeterogeneous[T]
+    #mojo version of TrackingRecHit2DHeterogeneous is not generic 
+    alias HitsOnCPU = TrackingRecHit2DHeterogeneous
     alias HitToTuple = HitToTuple
     alias TupleMultiplicity = TupleMultiplicity
     alias Quality = Quality
@@ -142,10 +143,10 @@ trait CAHitNtupletGeneratorKernels[T: MemoryTraits]:
     alias unique_ptr[X] = T.unique_ptr[X]
 
 
-    # Runtime members
+
     var counters_: Counters* = None
 
-    # --- Workspace memory ---
+    # --- Workspace  ---
     var cellStorage_: unique_ptr[UInt8[]]
     var device_theCellNeighbors_: unique_ptr[CAConstants.CellNeighborsVector]
     var device_theCellNeighborsContainer_: Nullable[CAConstants.CellNeighbors*]
@@ -164,7 +165,7 @@ trait CAHitNtupletGeneratorKernels[T: MemoryTraits]:
     var device_tupleMultiplicity_: unique_ptr[TupleMultiplicity]
     var device_storage_: unique_ptr[AtomicPairCounter.c_type[]]
 
-    # Const reference to Params (Mojo version)
+
     var m_params: borrowed[Params]
 
 
