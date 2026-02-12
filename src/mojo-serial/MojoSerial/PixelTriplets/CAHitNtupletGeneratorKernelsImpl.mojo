@@ -10,6 +10,8 @@ import math
 
 import CAConstants
 import cms
+from os.atomic import Atomic, Consistency
+from memory.unsafe_pointer import UnsafePointer
 import gpuPixelDoublets
 import GPUCACell
 from MojoSerial.CUDACore.CUDACompat import CUDACompat
@@ -51,8 +53,8 @@ fn Kernel_checkOverflows(
     if first == 0 :
         Atomic.fetch_add[ordering = Consistency.SEQUENTIAL](UnsafePointer(to=c.nEvents), 1)  
         Atomic.fetch_add[ordering = Consistency.SEQUENTIAL](UnsafePointer(to=c.nHits),nHits)
-        Atomic.fetch_add[ordering = Consistency.SEQUENTIAL](UnsafePointer(to=c.Cells),UnsafePointer[nCells] )
-        Atomic.fetch_add[ordering = Consistency.SEQUENTIAL](UnsafePointer(to=c.nTuples),apc[][].m )
+        Atomic.fetch_add[ordering = Consistency.SEQUENTIAL](UnsafePointer(to=c.nCells),UnsafePointer[c.nCells] )
+        Atomic.fetch_add[ordering = Consistency.SEQUENTIAL](UnsafePointer(to=c.nTuples),apc[].get().m )
         Atomic.fetch_add[ordering = Consistency.SEQUENTIAL](UnsafePointer(to=c.nFitTracks),tupleMultiplicity[].size())
 
     @parameter
