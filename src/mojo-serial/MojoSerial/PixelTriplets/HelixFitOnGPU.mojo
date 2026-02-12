@@ -1,9 +1,10 @@
 from CUDADataFormats import PixelTrackHeterogeneous
-from CUDADataFormats import TrackingRecHit2DCUDA
 import CAConstants
 import FitResults
 from MojoSerial.CUDACore.CUDACompat import CUDAStreamType
 from MojoSerial.MojoBridge.Matrix import Matrix, Map
+from MojoSerial.CUDADataFormats.TrackingRecHit2DSOAView import TrackingRecHit2DSOAView
+from MojoSerial.CUDADataFormats.PixelTrackHeterogeneous import PixelTrack as pixelTrack
 
 alias cudaStream_t = CUDAStreamType
 
