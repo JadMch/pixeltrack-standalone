@@ -1,4 +1,4 @@
-from MojoSerial.MojoBridge.Matrix import Matrix
+from MojoSerial.MojoBridge.Matrix import Matrix, MatrixXd, VectorXd
 from MojoSerial.MojoBridge.DTypes import DType
 
 struct Rfit:
@@ -22,21 +22,8 @@ struct Rfit:
     alias Vector3f = Matrix[Float64, 3, 1]
     alias Vector4f = Matrix[Float64, 4, 1]
     
-    #check this
-    struct MatrixXd:
-        @staticmethod
-        fn Zero[rows: Int, cols: Int](_: IntLiteral, _: IntLiteral) -> Matrix[Float64, rows, cols]:
-            return Matrix[Float64, rows, cols]()
-
-        @staticmethod
-        fn zero[rows: Int, cols: Int](_: IntLiteral, _: IntLiteral) -> Matrix[Float64, rows, cols]:
-            return Matrix[Float64, rows, cols]()
-
-        @staticmethod
-        fn Constant[rows: Int, cols: Int](_: IntLiteral, _: IntLiteral, val: Float64) -> Matrix[Float64, rows, cols]:
-            return Matrix[Float64, rows, cols](val)
-    #FIX-ME
-    alias VectorXd = Matrix[Float64, 0, 1]
+    alias MatrixXd = MatrixXd
+    alias VectorXd = VectorXd
 
     alias MatrixNd[N: Int] = Matrix[Float64, N, N]
     alias MatrixNplusONEd[N: Int] = Matrix[Float64, N + 1, N + 1]
