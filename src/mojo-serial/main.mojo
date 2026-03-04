@@ -9,6 +9,7 @@ from MojoSerial.Bin.PosixClockGettime import (
     CLOCK_PROCESS_CPUTIME_ID,
 )
 from MojoSerial.MojoBridge.DTypes import Double
+from algorithm.functional import parallelize
 
 
 fn print_help(ref name: String):
@@ -16,7 +17,7 @@ fn print_help(ref name: String):
         "Usage:",
         name,
         "[--warmupEvents WE] [--maxEvents ME] [--runForMinutes RM]",
-        "[--data PATH] [--validation] [--histogram] [--empty]",
+        "[--threads N] [--data PATH] [--validation] [--histogram] [--empty]",
     )
     print(
         r"""(
@@ -27,6 +28,7 @@ Options:
                                 (default -1 for disabled; conflicts with --maxEvents).
   --data                        Path to the 'data' directory (default 'data' in the directory of the executable).
   --empty                       Ignore all producers (for testing only).
+  --threads                     Number of streams/threads to run concurrently (default 1).
 )"""
     )
 
@@ -36,6 +38,7 @@ fn main() raises:
     var warmupEvents = 0
     var maxEvents = -1
     var runForMinutes = -1
+    var threads = 1
     var path = Path("")
     var empty = False
 
@@ -53,6 +56,9 @@ fn main() raises:
         elif args[i] == "--runForMinutes":
             i += 1
             runForMinutes = Int(args[i])
+        elif args[i] == "--threads":
+            i += 1
+            threads = Int(args[i])
         elif args[i] == "--data":
             i += 1
             path = Path(args[i])
@@ -70,6 +76,9 @@ fn main() raises:
             " them"
         )
         exit(1)
+    if threads <= 0:
+        print("Invalid --threads value, must be >= 1")
+        exit(1)
 
     if not path:
         path = Path("data")
@@ -78,52 +87,91 @@ fn main() raises:
         print("Data directory '", path, "' does not exist", sep="")
         exit(1)
 
-    ## Init plugins manually
-    var _esreg = MojoSerial.Framework.ESPluginFactory.Registry()
-    var _edreg = MojoSerial.Framework.PluginFactory.Registry()
-    if not empty:
-        MojoSerial.PluginSiPixelClusterizer.init(_esreg, _edreg)
-        MojoSerial.PluginBeamSpotProducer.init(_esreg, _edreg)
-        MojoSerial.PluginSiPixelRecHits.init(_esreg, _edreg)
-
-    var processor = EventProcessor(
-        warmupEvents, maxEvents, runForMinutes, path, False, _esreg, _edreg
-    )
     if runForMinutes < 0:
-        print("Processing", processor.maxEvents(), "events", end="")
+        print("Processing", maxEvents, "events", end="")
     else:
         print("Processing for about", runForMinutes, "minutes", end="")
     if warmupEvents > 0:
         print(" after", warmupEvents, "events of warm up", end="")
-    print(", with 1 concurrent events and 1 threads.")
+    print(", with ", threads, " concurrent events and ", threads, " threads.", sep="")
 
-    processor.warmUp()
-    var cpu_start = PosixClockGettime[CLOCK_PROCESS_CPUTIME_ID].now()
-    var start = perf_counter_ns()
-    processor.runToCompletion()
-    var cpu_stop = PosixClockGettime[CLOCK_PROCESS_CPUTIME_ID].now()
-    var stop = perf_counter_ns()
-    processor.endJob()
 
-    # Lifetime registry extension
-    _ = _esreg^
-    _ = _edreg^
+    var block_size = maxEvents // threads if maxEvents > 0 else -1
+
+    var start = List[UInt](length=threads, fill=0)
+    var end = List[UInt](length=threads, fill=0)
+
+    var processed = List[Int](length=threads, fill=0)
+
+    var cpu_start = List[UInt](length=threads, fill=0)
+    var cpu_end = List[UInt](length=threads, fill=0)
+
+    fn worker(i : Int) capturing:
+        ## Init plugins manually
+        var _esreg = MojoSerial.Framework.ESPluginFactory.Registry()
+        var _edreg = MojoSerial.Framework.PluginFactory.Registry()
+        if not empty:
+            MojoSerial.PluginSiPixelClusterizer.init(_esreg, _edreg)
+            MojoSerial.PluginBeamSpotProducer.init(_esreg, _edreg)
+            MojoSerial.PluginSiPixelRecHits.init(_esreg, _edreg)
+
+        var processor = EventProcessor(
+            warmupEvents,
+            block_size,
+            runForMinutes,
+            path,
+            False,
+            _esreg,
+            _edreg,
+        )
+
+        processor.warmUp()
+        start[i] = perf_counter_ns()
+        cpu_start[i] = PosixClockGettime[CLOCK_PROCESS_CPUTIME_ID].now()
+        processor.runToCompletion()
+        end[i] = perf_counter_ns()
+        cpu_end[i] = PosixClockGettime[CLOCK_PROCESS_CPUTIME_ID].now()
+        processor.endJob()
+
+        # Lifetime registry extension
+        _ = _esreg^
+        _ = _edreg^
+
+        processed[i] = Int(processor.processedEvents())
+
+    parallelize[worker](threads, threads)
+
+    var begin = start[0]
+    var stop = end[0]
+    for i in range(threads):
+        begin = min(begin, start[i])
+        stop = max(stop, end[i])
 
     # Work done, report timing
-    var diff = stop - start
+    var diff = stop - begin
     # in seconds
     var time: Double = diff / (10**9)
-    var cpu_diff = cpu_stop - cpu_start
+
+    var cpu_begin = cpu_start[0]
+    var cpu_stop = cpu_end[0]
+    for i in range(threads):
+        cpu_begin = min(cpu_begin, cpu_start[i])
+        cpu_stop = max(cpu_stop, cpu_end[i])
+
+    var cpu_diff = cpu_stop - cpu_begin
     var cpu: Double = cpu_diff / (10**9)
-    maxEvents = Int(processor.processedEvents())
+
+    var totalEvents = 0
+    for i in range(threads):
+        totalEvents += processed[i]
 
     print(
         "Processed ",
-        maxEvents,
+        totalEvents,
         " events in ",
         time,
         " seconds, throughput ",
-        (maxEvents / time),
+        (totalEvents / time),
         " events/s, CPU usage: ",
         round(cpu / time * 100),
         "%",
