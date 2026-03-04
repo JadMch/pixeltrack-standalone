@@ -313,6 +313,38 @@ struct Matrix[T: DType, rows: Int, colns: Int](
     fn __len__(self) -> Int:
         return rows * colns
 
+    @always_inline
+    @staticmethod
+    fn Zero() -> Self:
+        return Self()
+
+    @always_inline
+    @staticmethod
+    fn Constant(val: Self._D) -> Self:
+        var res = Self()
+        @parameter
+        for i in range(rows * colns):
+            res[i] = val
+        return res
+
+    @staticmethod
+    @parameter
+    fn RowsAtCompileTime() -> Int:
+        return rows
+
+    @staticmethod
+    @parameter
+    fn ColsAtCompileTime() -> Int:
+        return colns
+
+    @always_inline
+    fn rows(self) -> Int:
+        return rows
+
+    @always_inline
+    fn cols(self) -> Int:
+        return colns
+
     # Operators
 
     @always_inline
@@ -1325,3 +1357,244 @@ struct Matrix[T: DType, rows: Int, colns: Int](
         for i in range(rows):
             res[i] = Vector[T, colns](pop_count(self._data[i]._data))
         return Self(res)
+
+
+@fieldwise_init
+struct Map[T: DType, rows: Int, colns: Int, default_inner_stride: Int = 1](
+    Copyable,
+    Defaultable,
+    Movable,
+    Typeable,
+):
+    var data: UnsafePointer[Scalar[T]]
+    var inner_stride: Int
+    var outer_stride: Int
+
+    @always_inline
+    fn __init__(out self, ptr: UnsafePointer[Scalar[T]]):
+        self.data = ptr
+        self.inner_stride = default_inner_stride
+        self.outer_stride = rows * default_inner_stride
+
+    @always_inline
+    fn __init__(out self, ptr: UnsafePointer[Scalar[T]], inner_stride: Int):
+        self.data = ptr
+        self.inner_stride = inner_stride
+        self.outer_stride = rows * inner_stride
+
+    @always_inline
+    fn __init__(
+        out self,
+        ptr: UnsafePointer[Scalar[T]],
+        inner_stride: Int,
+        outer_stride: Int,
+    ):
+        self.data = ptr
+        self.inner_stride = inner_stride
+        self.outer_stride = outer_stride
+
+    @always_inline
+    fn __getitem__(self, r: Int, c: Int) -> Scalar[T]:
+        return (
+            self.data + c * self.outer_stride + r * self.inner_stride
+        )[]
+
+    @always_inline
+    fn __setitem__(mut self, r: Int, c: Int, val: Scalar[T]):
+        (self.data + c * self.outer_stride + r * self.inner_stride)[] = val
+    #this is not flattening it is just taking first col
+    @always_inline
+    fn __getitem__(self, i: Int) -> Scalar[T]:
+        constrained[colns == 1, "Map 1D access requires a column vector"]()
+        return self[i, 0]
+
+    @always_inline
+    fn __setitem__(mut self, i: Int, val: Scalar[T]):
+        constrained[colns == 1, "Map 1D access requires a column vector"]()
+        self[i, 0] = val
+
+    @always_inline
+    fn col(self, c: Int) -> Vector[T, rows]:
+        var res = Vector[T, rows]()
+        for r in range(rows):
+            res[r] = self[r, c]
+        return res
+
+    @always_inline
+    fn block(
+        self,
+        row: Int,
+        col: Int,
+        br: IntLiteral,
+        bc: IntLiteral,
+    ) -> Matrix[T, br, bc]:
+        var res = Matrix[T, br, bc]()
+        for r in range(br):
+            for c in range(bc):
+                res[r, c] = self[row + r, col + c]
+        return res
+        
+    #this is not flattening it is just taking first col
+    @always_inline
+    fn head(self, n: IntLiteral) -> Matrix[T, n, 1]:
+        constrained[colns == 1, "Map head() requires a column vector"]()
+        var res = Matrix[T, n, 1]()
+        for i in range(n):
+            res[i, 0] = self[i, 0]
+        return res
+
+    @staticmethod
+    @parameter
+    fn RowsAtCompileTime() -> Int:
+        return rows
+
+    @staticmethod
+    @parameter
+    fn ColsAtCompileTime() -> Int:
+        return colns
+
+    @always_inline
+    @staticmethod
+    fn dtype() -> String:
+        return (
+            "Map["
+            + T.__repr__()
+            + ", "
+            + String(rows)
+            + ", "
+            + String(colns)
+            + "]"
+        )
+
+
+@fieldwise_init
+struct MatrixXd(Defaultable, Movable, Typeable):
+    var _rows: Int
+    var _cols: Int
+    var _data: List[Float64]
+
+    @always_inline
+    fn __init__(out self):
+        self._rows = 0
+        self._cols = 0
+        self._data = List[Float64]()
+
+    @always_inline
+    fn __init__(out self, rows: Int, cols: Int, val: Float64 = 0.0):
+        self._rows = rows
+        self._cols = cols
+        self._data = List[Float64](length=rows * cols, fill=val)
+
+    @always_inline
+    fn rows(self) -> Int:
+        return self._rows
+
+    @always_inline
+    fn cols(self) -> Int:
+        return self._cols
+
+    @always_inline
+    fn __getitem__(self, r: Int, c: Int) -> Float64:
+        return self._data[r + c * self._rows]
+
+    @always_inline
+    fn __setitem__(mut self, r: Int, c: Int, val: Float64):
+        self._data[r + c * self._rows] = val
+
+    @staticmethod
+    fn Zero[rows: Int, cols: Int](
+        _: IntLiteral, _: IntLiteral
+    ) -> Matrix[Float64, rows, cols]:
+        return Matrix[Float64, rows, cols]()
+
+    @staticmethod
+    fn zero[rows: Int, cols: Int](
+        _: IntLiteral, _: IntLiteral
+    ) -> Matrix[Float64, rows, cols]:
+        return Matrix[Float64, rows, cols]()
+
+
+
+    @staticmethod
+    fn Zero(rows: Int, cols: Int) -> MatrixXd:
+        return MatrixXd(rows, cols, 0.0)
+
+    @staticmethod
+    fn zero(rows: Int, cols: Int) -> MatrixXd:
+        return MatrixXd(rows, cols, 0.0)
+
+    @staticmethod
+    fn Constant(rows: Int, cols: Int, val: Float64) -> MatrixXd:
+        return MatrixXd(rows, cols, val)
+
+    @always_inline
+    @staticmethod
+    fn dtype() -> String:
+        return "MatrixXd"
+
+
+@fieldwise_init
+struct VectorXd(Defaultable, Movable, Typeable):
+    var _size: Int
+    var _data: List[Float64]
+
+    @always_inline
+    fn __init__(out self):
+        self._size = 0
+        self._data = List[Float64]()
+
+    @always_inline
+    fn __init__(out self, size: Int, val: Float64 = 0.0):
+        self._size = size
+        self._data = List[Float64](length=size, fill=val)
+
+    @always_inline
+    fn size(self) -> Int:
+        return self._size
+
+    @always_inline
+    fn rows(self) -> Int:
+        return self._size
+
+    @always_inline
+    fn cols(self) -> Int:
+        return 1
+
+    @always_inline
+    fn __getitem__(self, i: Int) -> Float64:
+        return self._data[i]
+
+    @always_inline
+    fn __setitem__(mut self, i: Int, val: Float64):
+        self._data[i] = val
+
+    @staticmethod
+    fn Zero[rows: Int](_: IntLiteral) -> Matrix[Float64, rows, 1]:
+        return Matrix[Float64, rows, 1]()
+
+    @staticmethod
+    fn zero[rows: Int](_: IntLiteral) -> Matrix[Float64, rows, 1]:
+        return Matrix[Float64, rows, 1]()
+
+    @staticmethod
+    fn Constant[rows: Int](
+        _: IntLiteral, val: Float64
+    ) -> Matrix[Float64, rows, 1]:
+        return Matrix[Float64, rows, 1](val)
+
+    @staticmethod
+    fn Zero(size: Int) -> VectorXd:
+        return VectorXd(size, 0.0)
+
+    @staticmethod
+    fn zero(size: Int) -> VectorXd:
+        return VectorXd(size, 0.0)
+
+    @staticmethod
+    fn Constant(size: Int, val: Float64) -> VectorXd:
+        return VectorXd(size, val)
+
+    @always_inline
+    @staticmethod
+    fn dtype() -> String:
+        return "VectorXd"
