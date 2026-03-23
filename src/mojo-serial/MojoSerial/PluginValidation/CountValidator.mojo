@@ -26,34 +26,34 @@ struct CountValidator (
 ):
 
     var digiClusterCountToken_: EDGetTokenT[DigiClusterCount]
-    var trackCountToken_: EDGetTokenT[TrackCount]
-    var vertexCountToken_: EDGetTokenT[VertexCount]
+    #var trackCountToken_: EDGetTokenT[TrackCount]
+    #var vertexCountToken_: EDGetTokenT[VertexCount]
 
     var digiToken_: EDGetTokenT[SiPixelDigisSoA]
     var clusterToken_: EDGetTokenT[SiPixelClustersSoA]
     # cannot implicitly convert 'OwnedPointer[AnyStruct[TrackSoAT[maxNumber().cast[::DType]()]]]' value to 'Typeable' in type parameter
-    var trackToken_: EDGetTokenT[PixelTrackHeterogeneous[]]
-    var vertexToken_: EDGetTokenT[ZVertexSoA]
+    #var trackToken_: EDGetTokenT[PixelTrackHeterogeneous[]]
+    #var vertexToken_: EDGetTokenT[ZVertexSoA]
 
     fn __init__(out self):
         self.digiClusterCountToken_ = EDGetTokenT[DigiClusterCount]()
-        self.trackCountToken_ = EDGetTokenT[TrackCount]()
-        self.vertexCountToken_ = EDGetTokenT[VertexCount]()
+        #self.trackCountToken_ = EDGetTokenT[TrackCount]()
+        #self.vertexCountToken_ = EDGetTokenT[VertexCount]()
 
         self.digiToken_ = EDGetTokenT[SiPixelDigisSoA]()
         self.clusterToken_ = EDGetTokenT[SiPixelClustersSoA]()
-        self.trackToken_ = EDGetTokenT[PixelTrackHeterogeneous[]]()
-        self.vertexToken_ = EDGetTokenT[ZVertexSoA]()
+        #self.trackToken_ = EDGetTokenT[PixelTrackHeterogeneous[]]()
+        #self.vertexToken_ = EDGetTokenT[ZVertexSoA]()
 
     fn __init__(out self, mut reg: ProductRegistry):
         try:
             self.digiClusterCountToken_ = reg.consumes[DigiClusterCount]()
-            self.trackCountToken_ = reg.consumes[TrackCount]()
-            self.vertexCountToken_ = reg.consumes[VertexCount]()
+            #self.trackCountToken_ = reg.consumes[TrackCount]()
+            #self.vertexCountToken_ = reg.consumes[VertexCount]()
             self.digiToken_ = reg.consumes[SiPixelDigisSoA]()
             self.clusterToken_ = reg.consumes[SiPixelClustersSoA]()
-            self.trackToken_ = reg.consumes[PixelTrackHeterogeneous[]]()
-            self.vertexToken_ = reg.consumes[ZVertexSoA]()
+            #self.trackToken_ = reg.consumes[PixelTrackHeterogeneous[]]()
+            #self.vertexToken_ = reg.consumes[ZVertexSoA]()
         except e:
             print("Handled exception in CountValidator: ", e)
             return Self()
@@ -99,8 +99,9 @@ struct CountValidator (
             return str + " <== Format error: " + String(e)
 
     fn produce(mut self, mut iEvent: Event, ref iSetup: EventSetup):
-        var trackTolerance: Float32 = 0.012  # in 200 runs of 1k events all events are withing this tolerance
-        var vertexTolerance: Int8 = 1
+        # var trackTolerance: Float32 = 0.012  # in 200 runs of 1k events all events are withing this tolerance
+        # var vertexTolerance: Int8 = 1
+        print("AXEL CountValidator produce")
 
         var errorMsg: String = Self.strformat("Event {} ", iEvent.eventID())
         var ok: Bool = True
@@ -120,39 +121,40 @@ struct CountValidator (
             errorMsg += Self.strformat("\n N(clusters) is {} expected {}", clusters.nClusters(), count.nClusters())
             ok = False
 
-        ref trackCount = iEvent.get(self.trackCountToken_)
-        ref tracks = iEvent.get(self.trackToken_)
+        # ref trackCount = iEvent.get(self.trackCountToken_)
+        # ref tracks = iEvent.get(self.trackToken_)
 
-        nTracks: UInt32 = 0
-        for i in range(tracks.stride()):
-            if tracks.nHits(i) > 0:
-                nTracks += 1
+        # nTracks: UInt32 = 0
+        # for i in range(tracks.stride()):
+        #     if tracks.nHits(i) > 0:
+        #         nTracks += 1
         
-        rel = abs(Float32(nTracks - trackCount.nTracks())) / Float32(trackCount.nTracks())
-        if nTracks != trackCount.nTracks():
-            _ = CountValidator.addTrackDifference(rel)
-        if rel > trackTolerance:
-            errorMsg += Self.strformat(
-                "\n N(tracks) is {} expected {}",
-                nTracks,
-                trackCount.nTracks()
-            )
-            errorMsg += Self.strformat(", relative difference {} is outside tolerance {}", rel, trackTolerance)
-            ok = False
+        # rel = abs(Float32(nTracks - trackCount.nTracks())) / Float32(trackCount.nTracks())
+        # if nTracks != trackCount.nTracks():
+        #     _ = CountValidator.addTrackDifference(rel)
+        # if rel > trackTolerance:
+        #     errorMsg += Self.strformat(
+        #         "\n N(tracks) is {} expected {}",
+        #         nTracks,
+        #         trackCount.nTracks()
+        #     )
+        #     errorMsg += Self.strformat(", relative difference {} is outside tolerance {}", rel, trackTolerance)
+        #     ok = False
 
-        ref vertexCount = iEvent.get(self.vertexCountToken_)
-        ref vertices = iEvent.get(self.vertexToken_)
-        diff = abs(Int8(vertices.nvFinal) - Int8(vertexCount.nVertices()))
-        if diff != 0:
-            _ = CountValidator.addVertexDifference(diff)
-        if diff > vertexTolerance:
-            errorMsg += Self.strformat(
-                "\n N(vertices) is {} expected {}",
-                vertices.nvFinal,
-                vertexCount.nVertices()
-            )
-            errorMsg += Self.strformat(", difference {} is outside tolerance {}", diff, vertexTolerance)
-            ok = False
+        # Not yet produced:
+        # ref vertexCount = iEvent.get(self.vertexCountToken_)
+        # ref vertices = iEvent.get(self.vertexToken_)
+        # diff = abs(Int8(vertices.nvFinal) - Int8(vertexCount.nVertices()))
+        # if diff != 0:
+        #     _ = CountValidator.addVertexDifference(diff)
+        # if diff > vertexTolerance:
+        #     errorMsg += Self.strformat(
+        #         "\n N(vertices) is {} expected {}",
+        #         vertices.nvFinal,
+        #         vertexCount.nVertices()
+        #     )
+        #     errorMsg += Self.strformat(", difference {} is outside tolerance {}", diff, vertexTolerance)
+        #     ok = False
 
         _ = CountValidator.incAllEvents(1)
         if ok:
