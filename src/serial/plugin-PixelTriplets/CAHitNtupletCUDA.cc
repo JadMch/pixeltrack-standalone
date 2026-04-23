@@ -28,12 +28,11 @@ CAHitNtupletCUDA::CAHitNtupletCUDA(edm::ProductRegistry& reg)
       gpuAlgo_(reg) {}
 
 void CAHitNtupletCUDA::produce(edm::Event& iEvent, const edm::EventSetup& es) {
-abort();
-  auto bf = 0.0214256972711507;  // 1/fieldInGeV
+  auto bf = 0.0114256972711507;  // 1/fieldInGeV
 
   auto const& hits = iEvent.get(tokenHitCPU_);
 
   iEvent.emplace(tokenTrackCPU_, gpuAlgo_.makeTuples(hits, bf));
 }
 
-//DEFINE_FWK_MODULE(CAHitNtupletCUDA);
+DEFINE_FWK_MODULE(CAHitNtupletCUDA);

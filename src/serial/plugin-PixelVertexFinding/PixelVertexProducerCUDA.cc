@@ -40,7 +40,6 @@ PixelVertexProducerCUDA::PixelVertexProducerCUDA(edm::ProductRegistry& reg)
 }
 
 void PixelVertexProducerCUDA::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
-  abort();
   auto const* tracks = iEvent.get(tokenCPUTrack_).get();
   assert(tracks);
 
@@ -62,4 +61,4 @@ void PixelVertexProducerCUDA::produce(edm::Event& iEvent, const edm::EventSetup&
   iEvent.emplace(tokenCPUVertex_, m_gpuAlgo.make(tracks, m_ptMin));
 }
 
-//DEFINE_FWK_MODULE(PixelVertexProducerCUDA);
+DEFINE_FWK_MODULE(PixelVertexProducerCUDA);
