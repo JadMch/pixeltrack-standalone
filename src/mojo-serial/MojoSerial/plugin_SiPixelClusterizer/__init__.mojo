@@ -1,12 +1,12 @@
 from MojoSerial.Framework.ESPluginFactory import fwkEventSetupModule
 from MojoSerial.Framework.PluginFactory import fwkModule
-from MojoSerial.PluginSiPixelClusterizer.SiPixelFedCablingMapGPUWrapperESProducer import (
+from MojoSerial.plugin_SiPixelClusterizer.SiPixelFedCablingMapGPUWrapperESProducer import (
     SiPixelFedCablingMapGPUWrapperESProducer,
 )
-from MojoSerial.PluginSiPixelClusterizer.SiPixelGainCalibrationForHLTGPUESProducer import (
+from MojoSerial.plugin_SiPixelClusterizer.SiPixelGainCalibrationForHLTGPUESProducer import (
     SiPixelGainCalibrationForHLTGPUESProducer,
 )
-from MojoSerial.PluginSiPixelClusterizer.SiPixelRawToClusterCUDA import (
+from MojoSerial.plugin_SiPixelClusterizer.SiPixelRawToClusterCUDA import (
     SiPixelRawToClusterCUDA,
 )
 

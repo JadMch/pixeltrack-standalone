@@ -5,7 +5,7 @@ from MojoSerial.Framework.EventSetup import EventSetup
 from MojoSerial.Framework.ProductRegistry import ProductRegistry
 from MojoSerial.Framework.PluginFactory import PluginFactory, EDProducerConcrete
 from MojoSerial.MojoBridge.DTypes import Typeable
-from MojoSerial.Bin.Source import Source
+from MojoSerial.bin.Source import Source
 
 
 struct StreamSchedule(Defaultable, Movable, Typeable):
@@ -86,7 +86,7 @@ struct StreamSchedule(Defaultable, Movable, Typeable):
             for index in sorted_indices:
                 self._path.append((data + index).take_pointee())
         except e:
-            print("Error occurred in Bin/StreamSchedule.mojo,", e)
+            print("Error occurred in bin/StreamSchedule.mojo,", e)
             return Self()
 
     @always_inline

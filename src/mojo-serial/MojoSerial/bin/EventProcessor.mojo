@@ -4,8 +4,8 @@ from MojoSerial.Framework.ProductRegistry import ProductRegistry
 from MojoSerial.Framework.EventSetup import EventSetup
 from MojoSerial.Framework.ESPluginFactory import ESPluginFactory
 from MojoSerial.MojoBridge.DTypes import Typeable
-from MojoSerial.Bin.Source import Source
-from MojoSerial.Bin.StreamSchedule import StreamSchedule
+from MojoSerial.bin.Source import Source
+from MojoSerial.bin.StreamSchedule import StreamSchedule
 
 
 struct EventProcessor(Defaultable, Typeable):
@@ -68,7 +68,7 @@ struct EventProcessor(Defaultable, Typeable):
                 edreg,
             )
         except e:
-            print("Error occurred in Bin/EventProcessor.mojo,", e)
+            print("Error occurred in bin/EventProcessor.mojo,", e)
             return Self()
 
     @always_inline

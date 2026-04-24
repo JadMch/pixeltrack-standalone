@@ -17,8 +17,8 @@ from MojoSerial.DataFormats.PixelErrors import (
     PixelErrorCompact,
     PixelFormatterErrors,
 )
-from MojoSerial.PluginSiPixelClusterizer.GPUClustering import GPUClustering
-from MojoSerial.PluginSiPixelClusterizer.GPUCalibPixel import GPUCalibPixel
+from MojoSerial.plugin_SiPixelClusterizer.GPUClustering import GPUClustering
+from MojoSerial.plugin_SiPixelClusterizer.GPUCalibPixel import GPUCalibPixel
 from MojoSerial.MojoBridge.DTypes import UChar, Double, Float, Typeable
 
 

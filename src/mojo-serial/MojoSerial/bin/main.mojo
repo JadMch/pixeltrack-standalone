@@ -3,8 +3,8 @@ from sys.terminate import exit
 from time import perf_counter_ns
 from pathlib import Path
 
-from MojoSerial.Bin.EventProcessor import EventProcessor
-from MojoSerial.Bin.PosixClockGettime import (
+from MojoSerial.bin.EventProcessor import EventProcessor
+from MojoSerial.bin.PosixClockGettime import (
     PosixClockGettime,
     CLOCK_THREAD_CPUTIME_ID,
 )
@@ -133,13 +133,12 @@ fn main() raises:
         var _esreg = MojoSerial.Framework.ESPluginFactory.Registry()
         var _edreg = MojoSerial.Framework.PluginFactory.Registry()
         if not empty:
-            MojoSerial.PluginSiPixelClusterizer.init(_esreg, _edreg)
-            MojoSerial.PluginBeamSpotProducer.init(_esreg, _edreg)
-            MojoSerial.PluginSiPixelRecHits.init(_esreg, _edreg)
+            MojoSerial.plugin_SiPixelClusterizer.init(_esreg, _edreg)
+            MojoSerial.plugin_BeamSpotProducer.init(_esreg, _edreg)
+            MojoSerial.plugin_SiPixelRecHits.init(_esreg, _edreg)
 
         if validation:
-            MojoSerial.PluginValidation.CountValidator.init(_esreg, _edreg)
-
+            MojoSerial.plugin_Validation.CountValidator.init(_esreg, _edreg)
         var processor = EventProcessor(
             warmupEvents,
             startEvent[i],

@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from MojoSerial.PluginSiPixelClusterizer.SiPixelFedCablingMapGPUWrapperESProducer import (
+from MojoSerial.plugin_SiPixelClusterizer.SiPixelFedCablingMapGPUWrapperESProducer import (
     SiPixelFedCablingMapGPUWrapperESProducer,
 )
 from MojoSerial.Framework.EventSetup import EventSetup
@@ -13,7 +13,7 @@ from MojoSerial.MojoBridge.DTypes import Typeable
 fn main() raises:
     var _esreg = MojoSerial.Framework.ESPluginFactory.Registry()
     var _edreg = MojoSerial.Framework.PluginFactory.Registry()
-    MojoSerial.PluginSiPixelClusterizer.init(_esreg, _edreg)
+    MojoSerial.plugin_SiPixelClusterizer.init(_esreg, _edreg)
     var evt = EventSetup()
 
     for plugin in ESPluginFactory.getAll(_esreg):

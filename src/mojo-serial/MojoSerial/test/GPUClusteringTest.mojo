@@ -4,7 +4,7 @@ from memory import memset
 from MojoSerial.CUDADataFormats.GPUClusteringConstants import (
     GPUClusteringConstants,
 )
-from MojoSerial.PluginSiPixelClusterizer.GPUClustering import GPUClustering
+from MojoSerial.plugin_SiPixelClusterizer.GPUClustering import GPUClustering
 
 alias numElements = 256 * 2000
 

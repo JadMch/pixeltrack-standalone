@@ -1,10 +1,10 @@
 from MojoSerial.Framework.ESPluginFactory import fwkEventSetupModule
 from MojoSerial.Framework.PluginFactory import fwkModule
 
-from MojoSerial.PluginBeamSpotProducer.BeamSpotESProducer import (
+from MojoSerial.plugin_BeamSpotProducer.BeamSpotESProducer import (
     BeamSpotESProducer,
 )
-from MojoSerial.PluginBeamSpotProducer.BeamSpotToPOD import (
+from MojoSerial.plugin_BeamSpotProducer.BeamSpotToPOD import (
     BeamSpotToPOD,
 )
 

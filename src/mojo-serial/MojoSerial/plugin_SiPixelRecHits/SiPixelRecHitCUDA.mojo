@@ -15,7 +15,7 @@ from MojoSerial.CUDADataFormats.TrackingRecHit2DHeterogeneous import (
 from MojoSerial.CUDADataFormats.TrackingRecHit2DSOAView import (
     TrackingRecHit2DSOAView,
 )
-from MojoSerial.PluginSiPixelRecHits.PixelRecHits import (
+from MojoSerial.plugin_SiPixelRecHits.PixelRecHits import (
     PixelRecHitGPUKernel,
 )  # TODO : spit product from kernel
 from MojoSerial.MojoBridge.DTypes import Typeable
