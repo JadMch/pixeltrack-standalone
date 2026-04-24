@@ -139,7 +139,7 @@ struct Source(Defaultable, Movable, Typeable):
                 debug_assert(self._raw.__len__() == self._vertices.__len__())
 
         except e:
-            print("Error occurred in Bin/Source.mojo,", e)
+            print("Error occurred in bin/Source.mojo,", e)
             return Self()
 
     @always_inline

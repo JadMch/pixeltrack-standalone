@@ -1,7 +1,7 @@
 from MojoSerial.Framework.ESPluginFactory import fwkEventSetupModule
 from MojoSerial.Framework.PluginFactory import fwkModule
 
-from MojoSerial.PluginValidation.CountValidator import (
+from MojoSerial.plugin_Validation.CountValidator import (
     CountValidator,
 )
 

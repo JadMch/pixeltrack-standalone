@@ -20,12 +20,11 @@ from MojoSerial.Framework.EDGetToken import EDGetTokenT
 from MojoSerial.Framework.EDPutToken import EDPutTokenT
 from MojoSerial.Framework.ProductRegistry import ProductRegistry
 from MojoSerial.MojoBridge.DTypes import Typeable
-from MojoSerial.PluginSiPixelClusterizer.SiPixelRawToClusterGPUKernel import (
+from MojoSerial.plugin_SiPixelClusterizer.SiPixelRawToClusterGPUKernel import (
     SiPixelRawToClusterGPUKernel,
     WordFedAppender,
 )
-from MojoSerial.PluginSiPixelClusterizer.ErrorChecker import ErrorChecker
-
+from MojoSerial.plugin_SiPixelClusterizer.ErrorChecker import ErrorChecker
 
 struct SiPixelRawToClusterCUDA(Defaultable, EDProducer, Typeable):
     var _rawGetToken: EDGetTokenT[FEDRawDataCollection]

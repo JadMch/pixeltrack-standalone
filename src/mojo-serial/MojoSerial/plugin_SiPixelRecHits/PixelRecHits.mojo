@@ -3,7 +3,7 @@ from MojoSerial.CUDADataFormats.SiPixelClustersSoA import SiPixelClustersSoA
 from MojoSerial.CUDADataFormats.SiPixelDigisSoA import SiPixelDigisSoA
 from MojoSerial.CondFormats.PixelCPEforGPU import ParamsOnGPU
 from MojoSerial.MojoBridge.DTypes import Typeable
-from MojoSerial.PluginSiPixelRecHits.GPUPixelRecHits import getHits
+from MojoSerial.plugin_SiPixelRecHits.GPUPixelRecHits import getHits
 from MojoSerial.CUDACore.HistoContainer import fillManyFromVector
 
 

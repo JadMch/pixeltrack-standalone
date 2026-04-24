@@ -1,10 +1,10 @@
 from MojoSerial.Framework.ESPluginFactory import fwkEventSetupModule
 from MojoSerial.Framework.PluginFactory import fwkModule
 
-from MojoSerial.PluginSiPixelRecHits.PixelCPEFastESProducer import (
+from MojoSerial.plugin_SiPixelRecHits.PixelCPEFastESProducer import (
     PixelCPEFastESProducer,
 )
-from MojoSerial.PluginSiPixelRecHits.SiPixelRecHitCUDA import (
+from MojoSerial.plugin_SiPixelRecHits.SiPixelRecHitCUDA import (
     SiPixelRecHitCUDA,
 )
 
