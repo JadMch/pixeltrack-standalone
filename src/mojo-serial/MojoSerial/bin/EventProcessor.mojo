@@ -62,7 +62,7 @@ struct EventProcessor(Defaultable, Typeable):
                 esp.produce(self._eventSetup)
 
             self._schedule = StreamSchedule(
-                UnsafePointer(to=self._registry),
+                self._registry,
                 UnsafePointer(to=self._source),
                 UnsafePointer(to=self._eventSetup),
                 edreg,
@@ -95,7 +95,7 @@ struct EventProcessor(Defaultable, Typeable):
     @always_inline
     fn process(mut self):
         self._source.startProcessing()
-        self._schedule.run()
+        self._schedule.run(self._registry)
 
     @always_inline
     fn endJob(mut self) raises:

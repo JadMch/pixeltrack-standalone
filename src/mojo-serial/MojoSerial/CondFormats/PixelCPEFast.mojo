@@ -60,6 +60,19 @@ struct PixelCPEFast(Defaultable, Movable, Typeable):
             UnsafePointer(to=self.m_averageGeometry),
         )
 
+    fn __moveinit__(out self, var other: Self):
+        self.m_detParamsGPU = other.m_detParamsGPU^
+        self.m_commonParamsGPU = other.m_commonParamsGPU
+        self.m_layerGeometry = other.m_layerGeometry^
+        self.m_averageGeometry = other.m_averageGeometry^
+
+        self._cpuData = ParamsOnGPU(
+            UnsafePointer(to=self.m_commonParamsGPU),
+            self.m_detParamsGPU.unsafe_ptr(),
+            UnsafePointer(to=self.m_layerGeometry),
+            UnsafePointer(to=self.m_averageGeometry),
+        )
+
     @always_inline
     fn getCPUProduct(self) -> ref [self._cpuData] ParamsOnGPU:
         return self._cpuData
