@@ -9,7 +9,6 @@ from MojoSerial.bin.Source import Source
 
 
 struct StreamSchedule(Defaultable, Movable, Typeable):
-    var _registry: UnsafePointer[ProductRegistry]
     var _source: UnsafePointer[Source]
     var _eventSetup: UnsafePointer[EventSetup]
     var _path: List[EDProducerConcrete]
@@ -17,7 +16,6 @@ struct StreamSchedule(Defaultable, Movable, Typeable):
 
     @always_inline
     fn __init__(out self):
-        self._registry = UnsafePointer[ProductRegistry]()
         self._source = UnsafePointer[Source]()
         self._eventSetup = UnsafePointer[EventSetup]()
         self._path = []
@@ -25,14 +23,13 @@ struct StreamSchedule(Defaultable, Movable, Typeable):
 
     fn __init__(
         out self,
-        reg: UnsafePointer[ProductRegistry],
+        mut reg: ProductRegistry,
         source: UnsafePointer[Source],
         eventSetup: UnsafePointer[EventSetup],
         mut edreg: MojoSerial.Framework.PluginFactory.Registry,
         streamId: Int32 = 0,
     ):
         try:
-            self._registry = reg
             self._source = source
             self._eventSetup = eventSetup
             self._streamId = streamId
@@ -46,15 +43,15 @@ struct StreamSchedule(Defaultable, Movable, Typeable):
 
             var i: UInt = 0
             for name in PluginFactory.getAll(edreg):
-                self._registry[].beginModuleConstruction(i + 1)
+                reg.beginModuleConstruction(i + 1)
                 producers.append(
-                    PluginFactory.create(name, self._registry[], edreg)
+                    PluginFactory.create(name, reg, edreg)
                 )
-                var dep_indices = self._registry[].consumedModules()
+                var dep_indices = reg.consumedModules()
                 # remove dependency on FEDRawDataCollection from resolver logic
                 # it is the parent of all producers (guaranteed by Source)
                 if 0 in dep_indices:
-                    dep_indices.remove(0)
+                    _ = dep_indices.pop(0)
                 in_degree[i] = dep_indices.__len__()
 
                 for dep_index in dep_indices:
@@ -91,21 +88,20 @@ struct StreamSchedule(Defaultable, Movable, Typeable):
 
     @always_inline
     fn __moveinit__(out self, var other: Self):
-        self._registry = other._registry
         self._source = other._source
         self._eventSetup = other._eventSetup
         self._path = other._path^
         self._streamId = other._streamId
 
-    fn run(mut self):
+    fn run(mut self, ref reg: ProductRegistry):
         var event: Event
-        var ptr = self._source[].produce(self._streamId, self._registry[])
+        var ptr = self._source[].produce(self._streamId, reg)
         while ptr != UnsafePointer[Event]():
             event = ptr.take_pointee()
             ptr.free()
             for i in range(self._path.__len__()):
                 self._path[i].produce(event, self._eventSetup[])
-            ptr = self._source[].produce(self._streamId, self._registry[])
+            ptr = self._source[].produce(self._streamId, reg)
 
     fn endJob(mut self) raises:
         for i in range(self._path.__len__()):
