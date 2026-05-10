@@ -20,11 +20,16 @@ namespace {
     int begin = 0;
     constexpr int end = 11;
     for (int i = begin; i < end; i += 1) {
-      hitsLayerStart[i] = hitsModuleStart[cpeParams->layerGeometry().layerStart[i]];
-#ifdef GPU_DEBUG
-      printf("LayerStart %d %d: %d\n", i, cpeParams->layerGeometry().layerStart[i], hitsLayerStart[i]);
-#endif
-    }
+  auto moduleIndex = cpeParams->layerGeometry().layerStart[i];
+  hitsLayerStart[i] = hitsModuleStart[moduleIndex];
+
+  std::cout << "[serial-setLayerStart]"
+            << " i=" << i
+            << " moduleIndex=" << moduleIndex
+            << " hitsModuleStart=" << hitsModuleStart[moduleIndex]
+            << " written=" << hitsLayerStart[i]
+            << std::endl;
+}
   }
 }  // namespace
 

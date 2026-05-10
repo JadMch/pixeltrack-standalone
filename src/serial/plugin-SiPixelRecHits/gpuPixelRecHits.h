@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <cstdio>
 #include <limits>
+#include <iostream>
 
 #include "DataFormats/BeamSpotPOD.h"
 #include "CUDADataFormats/TrackingRecHit2DHeterogeneous.h"
@@ -166,9 +167,39 @@ namespace gpuPixelRecHits {
           assert(h < hits.nHits());
           assert(h < clusters.clusModuleStart(me + 1));
 
+          if (h < 5) {
+            std::cout << "[serial-before-position]"
+                      << " h=" << h
+                      << " me=" << me
+                      << " ic=" << ic
+                      << " minRow=" << clusParams.minRow[ic]
+                      << " maxRow=" << clusParams.maxRow[ic]
+                      << " minCol=" << clusParams.minCol[ic]
+                      << " maxCol=" << clusParams.maxCol[ic]
+                      << " qfx=" << clusParams.Q_f_X[ic]
+                      << " qlx=" << clusParams.Q_l_X[ic]
+                      << " qfy=" << clusParams.Q_f_Y[ic]
+                      << " qly=" << clusParams.Q_l_Y[ic]
+                      << " charge=" << clusParams.charge[ic]
+                      << std::endl;
+          }
+
           pixelCPEforGPU::position(cpeParams->commonParams(), cpeParams->detParams(me), clusParams, ic);
           pixelCPEforGPU::errorFromDB(cpeParams->commonParams(), cpeParams->detParams(me), clusParams, ic);
 
+          if (h < 5) {
+            std::cout << "[serial-after-position]"
+                      << " h=" << h
+                      << " me=" << me
+                      << " ic=" << ic
+                      << " xpos=" << clusParams.xpos[ic]
+                      << " ypos=" << clusParams.ypos[ic]
+                      << " xsize=" << clusParams.xsize[ic]
+                      << " ysize=" << clusParams.ysize[ic]
+                      << " xerr=" << clusParams.xerr[ic]
+                      << " yerr=" << clusParams.yerr[ic]
+                      << std::endl;
+          }
           // store it
 
           hits.charge(h) = clusParams.charge[ic];

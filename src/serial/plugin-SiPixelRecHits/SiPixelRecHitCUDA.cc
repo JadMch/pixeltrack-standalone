@@ -37,6 +37,24 @@ SiPixelRecHitCUDA::SiPixelRecHitCUDA(edm::ProductRegistry& reg)
 void SiPixelRecHitCUDA::produce(edm::Event& iEvent, const edm::EventSetup& es) {
   PixelCPEFast const& fcpe = es.get<PixelCPEFast>();
 
+  auto const* cpe = &fcpe.getCPUProduct();
+  auto const& common = cpe->commonParams();
+  auto const& det0 = cpe->detParams(0);
+
+  std::cout << "[serial-cpe]"
+            << " pitchX=" << common.thePitchX
+            << " pitchY=" << common.thePitchY
+            << " thicknessB=" << common.theThicknessB
+            << " thicknessE=" << common.theThicknessE
+            << " det0.shiftX=" << det0.shiftX
+            << " det0.shiftY=" << det0.shiftY
+            << " det0.chargeWidthX=" << det0.chargeWidthX
+            << " det0.chargeWidthY=" << det0.chargeWidthY
+            << " det0.x0=" << det0.x0
+            << " det0.y0=" << det0.y0
+            << " det0.z0=" << det0.z0
+            << std::endl;
+
   auto const& clusters = iEvent.get(token_);
   auto const& digis = iEvent.get(tokenDigi_);
   auto const& bs = iEvent.get(tBeamSpot);
@@ -46,7 +64,7 @@ void SiPixelRecHitCUDA::produce(edm::Event& iEvent, const edm::EventSetup& es) {
     std::cout << "Clusters/Hits Overflow " << nHits << " >= " << TrackingRecHit2DSOAView::maxHits() << std::endl;
   }
 
-  auto hits = gpuAlgo_.makeHits(digis, clusters, bs, &fcpe.getCPUProduct());
+  auto hits = gpuAlgo_.makeHits(digis, clusters, bs, cpe);
   auto const* hv = hits.view();
 
   double sumXL = 0.0;

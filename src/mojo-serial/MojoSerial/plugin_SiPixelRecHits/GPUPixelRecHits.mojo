@@ -172,6 +172,24 @@ fn getHits(
                 debug_assert(h < Int(hits.nHits()))
                 debug_assert(h < Int(clusters.clusModuleStart(me + 1)))
 
+                if h < 5:
+                    print(
+                        "[mojo-before-position]",
+                        " h=", h,
+                        " me=", me,
+                        " ic=", ic,
+                        " minRow=", clusParams.minRow[ic],
+                        " maxRow=", clusParams.maxRow[ic],
+                        " minCol=", clusParams.minCol[ic],
+                        " maxCol=", clusParams.maxCol[ic],
+                        " qfx=", clusParams.Q_f_X[ic],
+                        " qlx=", clusParams.Q_l_X[ic],
+                        " qfy=", clusParams.Q_f_Y[ic],
+                        " qly=", clusParams.Q_l_Y[ic],
+                        " charge=", clusParams.charge[ic],
+                        sep="",
+                    )
+
                 PixelCPEforGPU.position(
                     cpeParams[].commonParams(),
                     cpeParams[].detParams(me),
@@ -184,6 +202,21 @@ fn getHits(
                     clusParams,
                     ic,
                 )
+
+                if h < 5:
+                    print(
+                        "[mojo-after-position]",
+                        " h=", h,
+                        " me=", me,
+                        " ic=", ic,
+                        " xpos=", clusParams.xpos[ic],
+                        " ypos=", clusParams.ypos[ic],
+                        " xsize=", clusParams.xsize[ic],
+                        " ysize=", clusParams.ysize[ic],
+                        " xerr=", clusParams.xerr[ic],
+                        " yerr=", clusParams.yerr[ic],
+                        sep="",
+                    )
 
                 # store it
 

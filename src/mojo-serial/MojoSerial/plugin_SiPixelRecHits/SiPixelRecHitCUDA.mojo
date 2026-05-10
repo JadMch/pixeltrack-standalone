@@ -68,11 +68,30 @@ struct SiPixelRecHitCUDA(Defaultable, EDProducer, Typeable):
             )
 
         try:
+            var cpe = UnsafePointer(to=es.get[PixelCPEFast]().getCPUProduct())
+            var common = cpe[].commonParams()
+            var det0 = cpe[].detParams(0)
+
+            print(
+                "[mojo-cpe]",
+                " pitchX=", common.thePitchX,
+                " pitchY=", common.thePitchY,
+                " thicknessB=", common.theThicknessB,
+                " thicknessE=", common.theThicknessE,
+                " det0.shiftX=", det0.shiftX,
+                " det0.shiftY=", det0.shiftY,
+                " det0.chargeWidthX=", det0.chargeWidthX,
+                " det0.chargeWidthY=", det0.chargeWidthY,
+                " det0.x0=", det0.x0,
+                " det0.y0=", det0.y0,
+                " det0.z0=", det0.z0,
+                sep="",
+            )
             var hits = self.gpuAlgo_.makeHits(
                 digis,
                 clusters,
                 bs,
-                UnsafePointer(to=es.get[PixelCPEFast]().getCPUProduct()),
+                cpe,
             )
 
             var hv = hits.view()
