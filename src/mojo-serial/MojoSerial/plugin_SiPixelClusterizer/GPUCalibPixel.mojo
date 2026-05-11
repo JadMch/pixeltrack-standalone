@@ -63,7 +63,52 @@ struct GPUCalibPixel:
                 adc[i] = 0
                 print("bad pixel at", i, "in", id[i])
             else:
-                var vcal = adc[i].cast[DType.float32]() * gain - pedestal * gain
-                adc[i] = max(
-                    100, (vcal * conversionFactor + offset).cast[DType.uint16]()
-                )
+                var rawAdcU16 = adc[i]
+                var rawAdc = rawAdcU16.cast[DType.float32]()
+
+                # Match C++ float arithmetic step-by-step:
+                # float vcal = adc[i] * gain - pedestal * gain;
+                var adcTimesGain = (rawAdc * gain).cast[DType.float32]()
+                var pedTimesGain = (pedestal * gain).cast[DType.float32]()
+                var vcal = (adcTimesGain - pedTimesGain).cast[DType.float32]()
+
+                # Match C++:
+                # adc[i] = std::max(100, int(vcal * conversionFactor + offset));
+                var scaled = (vcal * conversionFactor).cast[DType.float32]()
+                var calibratedF = (scaled + offset).cast[DType.float32]()
+
+                # C++ int(float) truncates toward zero.
+                var calibrated = calibratedF.cast[DType.int32]()
+
+                var finalAdc: UInt16
+                if calibrated < 100:
+                    finalAdc = UInt16(100)
+                else:
+                    finalAdc = calibrated.cast[DType.uint16]()
+
+                # DO NOT REMOVE THIS LOOP, it prevents these values' calculation
+                # from being optimized by the compiler which would cause errors.
+                if i == 23814 and id[i] == 674 and x[i] == 9 and y[i] == 4:
+                    print(
+                        "[mojo-calib-target]",
+                        " i=", i,
+                        " id=", id[i],
+                        " x=", x[i],
+                        " y=", y[i],
+                        " rawAdcU16=", rawAdcU16,
+                        " rawAdc=", rawAdc,
+                        " pedestal=", pedestal,
+                        " gain=", gain,
+                        " conversionFactor=", conversionFactor,
+                        " offset=", offset,
+                        " adcTimesGain=", adcTimesGain,
+                        " pedTimesGain=", pedTimesGain,
+                        " vcal=", vcal,
+                        " scaled=", scaled,
+                        " calibratedF=", calibratedF,
+                        " calibratedI=", calibrated,
+                        " finalAdc=", finalAdc,
+                        sep="",
+                    )
+
+                adc[i] = finalAdc
