@@ -19,7 +19,7 @@ fn countFromVector[
         var off = CUDAStdAlgorithm.upper_bound(offsets, offsets + nh + 1, i)
 
         debug_assert(off[] > 0)
-        var ih: Int32 = Int(off) - Int(offsets) - 1
+        var ih: Int32 = ((Int(off) - Int(offsets)) // sizeof[UInt32]()) - 1
 
         debug_assert(ih >= 0)
         debug_assert(ih < Int(nh))
@@ -38,7 +38,7 @@ fn fillFromVector[
         var off = CUDAStdAlgorithm.upper_bound(offsets, offsets + nh + 1, i)
 
         debug_assert(off[] > 0)
-        var ih: Int32 = Int(off) - Int(offsets) - 1
+        var ih: Int32 = ((Int(off) - Int(offsets)) // sizeof[UInt32]()) - 1
 
         debug_assert(ih >= 0)
         debug_assert(ih < Int(nh))
