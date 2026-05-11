@@ -51,7 +51,8 @@ struct StreamSchedule(Defaultable, Movable, Typeable):
                 # remove dependency on FEDRawDataCollection from resolver logic
                 # it is the parent of all producers (guaranteed by Source)
                 if 0 in dep_indices:
-                    _ = dep_indices.pop(0)
+                    dep_indices.remove(0)
+
                 in_degree[i] = dep_indices.__len__()
 
                 for dep_index in dep_indices:
