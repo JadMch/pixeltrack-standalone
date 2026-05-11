@@ -68,30 +68,11 @@ struct SiPixelRecHitCUDA(Defaultable, EDProducer, Typeable):
             )
 
         try:
-            var cpe = UnsafePointer(to=es.get[PixelCPEFast]().getCPUProduct())
-            var common = cpe[].commonParams()
-            var det0 = cpe[].detParams(0)
-
-            print(
-                "[mojo-cpe]",
-                " pitchX=", common.thePitchX,
-                " pitchY=", common.thePitchY,
-                " thicknessB=", common.theThicknessB,
-                " thicknessE=", common.theThicknessE,
-                " det0.shiftX=", det0.shiftX,
-                " det0.shiftY=", det0.shiftY,
-                " det0.chargeWidthX=", det0.chargeWidthX,
-                " det0.chargeWidthY=", det0.chargeWidthY,
-                " det0.x0=", det0.x0,
-                " det0.y0=", det0.y0,
-                " det0.z0=", det0.z0,
-                sep="",
-            )
             var hits = self.gpuAlgo_.makeHits(
                 digis,
                 clusters,
                 bs,
-                cpe,
+                UnsafePointer(to=es.get[PixelCPEFast]().getCPUProduct()),
             )
 
             var hv = hits.view()
@@ -102,6 +83,7 @@ struct SiPixelRecHitCUDA(Defaultable, EDProducer, Typeable):
             var sumYG: Float64 = 0.0
             var sumZG: Float64 = 0.0
             var sumRG: Float64 = 0.0
+
             var sumCharge: Int64 = 0
             var sumSizeX: Int64 = 0
             var sumSizeY: Int64 = 0
@@ -115,6 +97,7 @@ struct SiPixelRecHitCUDA(Defaultable, EDProducer, Typeable):
                 sumYG += Float64(hv[].yGlobal(i))
                 sumZG += Float64(hv[].zGlobal(i))
                 sumRG += Float64(hv[].rGlobal(i))
+
                 sumCharge += Int64(hv[].charge(i))
                 sumSizeX += Int64(hv[].clusterSizeX(i))
                 sumSizeY += Int64(hv[].clusterSizeY(i))
@@ -145,6 +128,58 @@ struct SiPixelRecHitCUDA(Defaultable, EDProducer, Typeable):
             for i in range(11):
                 print(" l", i, "=", hv[].hitsLayerStart()[i], end="", sep="")
             print()
+
+            for layer in range(10):
+                var begin = Int(hv[].hitsLayerStart()[layer])
+                var end = Int(hv[].hitsLayerStart()[layer + 1])
+
+                var layerCharge: Int64 = 0
+                var layerSizeX: Int64 = 0
+                var layerSizeY: Int64 = 0
+                var layerDet: Int64 = 0
+                var layerIphi: Int64 = 0
+
+                var layerXL: Float64 = 0.0
+                var layerYL: Float64 = 0.0
+                var layerXG: Float64 = 0.0
+                var layerYG: Float64 = 0.0
+                var layerZG: Float64 = 0.0
+                var layerRG: Float64 = 0.0
+
+                for i in range(begin, end):
+                    layerCharge += Int64(hv[].charge(i))
+                    layerSizeX += Int64(hv[].clusterSizeX(i))
+                    layerSizeY += Int64(hv[].clusterSizeY(i))
+                    layerDet += Int64(hv[].detectorIndex(i))
+                    layerIphi += Int64(hv[].iphi(i))
+
+                    layerXL += Float64(hv[].xLocal(i))
+                    layerYL += Float64(hv[].yLocal(i))
+                    layerXG += Float64(hv[].xGlobal(i))
+                    layerYG += Float64(hv[].yGlobal(i))
+                    layerZG += Float64(hv[].zGlobal(i))
+                    layerRG += Float64(hv[].rGlobal(i))
+
+                print(
+                    "[mojo-final-layer]",
+                    " event=", iEvent.eventID(),
+                    " layer=", layer,
+                    " begin=", begin,
+                    " end=", end,
+                    " n=", end - begin,
+                    " sumCharge=", layerCharge,
+                    " sumSizeX=", layerSizeX,
+                    " sumSizeY=", layerSizeY,
+                    " sumDet=", layerDet,
+                    " sumIphi=", layerIphi,
+                    " sumXL=", layerXL,
+                    " sumYL=", layerYL,
+                    " sumXG=", layerXG,
+                    " sumYG=", layerYG,
+                    " sumZG=", layerZG,
+                    " sumRG=", layerRG,
+                    sep="",
+                )
 
             fn printHit(i: Int, label: String, hv: UnsafePointer[TrackingRecHit2DSOAView], eventID: Int32):
                 print(

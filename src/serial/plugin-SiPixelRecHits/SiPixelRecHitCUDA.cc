@@ -10,6 +10,9 @@
 
 #include "PixelRecHits.h"  // TODO : spit product from kernel
 
+#include <iomanip>
+#include <iostream>
+
 class SiPixelRecHitCUDA : public edm::EDProducer {
 public:
   explicit SiPixelRecHitCUDA(edm::ProductRegistry& reg);
@@ -64,7 +67,7 @@ void SiPixelRecHitCUDA::produce(edm::Event& iEvent, const edm::EventSetup& es) {
     std::cout << "Clusters/Hits Overflow " << nHits << " >= " << TrackingRecHit2DSOAView::maxHits() << std::endl;
   }
 
-  auto hits = gpuAlgo_.makeHits(digis, clusters, bs, cpe);
+  auto hits = gpuAlgo_.makeHits(digis, clusters, bs, &fcpe.getCPUProduct());
   auto const* hv = hits.view();
 
   double sumXL = 0.0;
@@ -73,6 +76,7 @@ void SiPixelRecHitCUDA::produce(edm::Event& iEvent, const edm::EventSetup& es) {
   double sumYG = 0.0;
   double sumZG = 0.0;
   double sumRG = 0.0;
+
   long long sumCharge = 0;
   long long sumSizeX = 0;
   long long sumSizeY = 0;
@@ -86,12 +90,15 @@ void SiPixelRecHitCUDA::produce(edm::Event& iEvent, const edm::EventSetup& es) {
     sumYG += hv->yGlobal(i);
     sumZG += hv->zGlobal(i);
     sumRG += hv->rGlobal(i);
+
     sumCharge += hv->charge(i);
     sumSizeX += hv->clusterSizeX(i);
     sumSizeY += hv->clusterSizeY(i);
     sumDet += hv->detectorIndex(i);
     sumIphi += hv->iphi(i);
   }
+
+  std::cout << std::setprecision(17);
 
   std::cout << "[serial-final-summary]"
             << " event=" << iEvent.eventID()
@@ -116,6 +123,58 @@ void SiPixelRecHitCUDA::produce(edm::Event& iEvent, const edm::EventSetup& es) {
 
   for (int i = 0; i < 11; ++i) {
     std::cout << " l" << i << "=" << hv->hitsLayerStart()[i];
+  }
+
+  for (int layer = 0; layer < 10; ++layer) {
+    uint32_t begin = hv->hitsLayerStart()[layer];
+    uint32_t end = hv->hitsLayerStart()[layer + 1];
+
+    long long layerCharge = 0;
+    long long layerSizeX = 0;
+    long long layerSizeY = 0;
+    long long layerDet = 0;
+    long long layerIphi = 0;
+
+    double layerXL = 0.0;
+    double layerYL = 0.0;
+    double layerXG = 0.0;
+    double layerYG = 0.0;
+    double layerZG = 0.0;
+    double layerRG = 0.0;
+
+    for (uint32_t i = begin; i < end; ++i) {
+      layerCharge += hv->charge(i);
+      layerSizeX += hv->clusterSizeX(i);
+      layerSizeY += hv->clusterSizeY(i);
+      layerDet += hv->detectorIndex(i);
+      layerIphi += hv->iphi(i);
+
+      layerXL += hv->xLocal(i);
+      layerYL += hv->yLocal(i);
+      layerXG += hv->xGlobal(i);
+      layerYG += hv->yGlobal(i);
+      layerZG += hv->zGlobal(i);
+      layerRG += hv->rGlobal(i);
+    }
+
+    std::cout << "[serial-final-layer]"
+              << " event=" << iEvent.eventID()
+              << " layer=" << layer
+              << " begin=" << begin
+              << " end=" << end
+              << " n=" << (end - begin)
+              << " sumCharge=" << layerCharge
+              << " sumSizeX=" << layerSizeX
+              << " sumSizeY=" << layerSizeY
+              << " sumDet=" << layerDet
+              << " sumIphi=" << layerIphi
+              << " sumXL=" << layerXL
+              << " sumYL=" << layerYL
+              << " sumXG=" << layerXG
+              << " sumYG=" << layerYG
+              << " sumZG=" << layerZG
+              << " sumRG=" << layerRG
+              << std::endl;
   }
 
   std::cout << std::endl;
@@ -147,4 +206,5 @@ void SiPixelRecHitCUDA::produce(edm::Event& iEvent, const edm::EventSetup& es) {
 
   iEvent.emplace(tokenHit_, std::move(hits));
 }
+
 DEFINE_FWK_MODULE(SiPixelRecHitCUDA);
